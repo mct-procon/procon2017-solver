@@ -53,6 +53,7 @@
     <Compile Include="DXLib\DxDLLW.cs" />
     <Compile Include="DXLib\Geometory.cs" />
     <Compile Include="DXLib\Input.cs" />
+    <Compile Include="DXLib\System.cs" />
     <Compile Include="DXLib\Window.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

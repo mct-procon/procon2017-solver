@@ -7,10 +7,6 @@ namespace DxLib {
             Ok = 0, Return = 1, Default = 2, RefreshNormal = 3
         }
 
-        public enum Result {
-            Error = -1, Successed = 0
-        }
-
         [DllImport("DxLibW.dll", EntryPoint = "dx_ChangeWindowMode", CharSet = CharSet.Unicode)]
         extern static int dx_ChangeWindowMode_x86([MarshalAs(UnmanagedType.Bool)] bool Flag);
         [DllImport("DxLibW_x64.dll", EntryPoint = "dx_ChangeWindowMode", CharSet = CharSet.Unicode)]

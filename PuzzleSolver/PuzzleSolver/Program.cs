@@ -10,12 +10,12 @@ namespace PuzzleSolver {
         [STAThread]
         static void Main(string[] args) {
             DX.ChangeWindowMode(true);
-            if (DX.DxLib_Init() == -1) Environment.Exit(-1);
+            if (DX.Init() == DX.Result.Error) Environment.Exit(-1);
 
-            while(DX.ProcessMessage() != -1) {
+            while(DX.ProcessMessage() == DX.Result.Success) {
 
             }
-            DX.DxLib_End();
+            DX.Finalize();
         }
     }
 }

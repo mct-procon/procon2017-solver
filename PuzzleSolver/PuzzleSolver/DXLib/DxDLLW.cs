@@ -2829,40 +2829,6 @@ namespace DxLib
 			}
 		}
 
-
-
-		[DllImport("DxLibW.dll", EntryPoint="dx_DxLib_Init", CharSet=CharSet.Unicode)]
-		extern static int  dx_DxLib_Init_x86( );
-		[DllImport("DxLibW_x64.dll", EntryPoint="dx_DxLib_Init", CharSet=CharSet.Unicode)]
-		extern static int  dx_DxLib_Init_x64( );
-		public static int  DxLib_Init( )
-		{
-			if( System.IntPtr.Size == 4 )
-			{
-				return dx_DxLib_Init_x86( );
-			}
-			else
-			{
-				return dx_DxLib_Init_x64( );
-			}
-		}
-
-		[DllImport("DxLibW.dll", EntryPoint="dx_DxLib_End", CharSet=CharSet.Unicode)]
-		extern static int  dx_DxLib_End_x86( );
-		[DllImport("DxLibW_x64.dll", EntryPoint="dx_DxLib_End", CharSet=CharSet.Unicode)]
-		extern static int  dx_DxLib_End_x64( );
-		public static int  DxLib_End( )
-		{
-			if( System.IntPtr.Size == 4 )
-			{
-				return dx_DxLib_End_x86( );
-			}
-			else
-			{
-				return dx_DxLib_End_x64( );
-			}
-		}
-
 		[DllImport("DxLibW.dll", EntryPoint="dx_DxLib_GlobalStructInitialize", CharSet=CharSet.Unicode)]
 		extern static int  dx_DxLib_GlobalStructInitialize_x86( );
 		[DllImport("DxLibW_x64.dll", EntryPoint="dx_DxLib_GlobalStructInitialize", CharSet=CharSet.Unicode)]
@@ -2927,21 +2893,7 @@ namespace DxLib
 			}
 		}
 
-		[DllImport("DxLibW.dll", EntryPoint="dx_ProcessMessage", CharSet=CharSet.Unicode)]
-		extern static int  dx_ProcessMessage_x86( );
-		[DllImport("DxLibW_x64.dll", EntryPoint="dx_ProcessMessage", CharSet=CharSet.Unicode)]
-		extern static int  dx_ProcessMessage_x64( );
-		public static int  ProcessMessage( )
-		{
-			if( System.IntPtr.Size == 4 )
-			{
-				return dx_ProcessMessage_x86( );
-			}
-			else
-			{
-				return dx_ProcessMessage_x64( );
-			}
-		}
+		
 
 		[DllImport("DxLibW.dll", EntryPoint="dx_SetAlwaysRunFlag", CharSet=CharSet.Unicode)]
 		extern static int  dx_SetAlwaysRunFlag_x86( int  Flag);
