@@ -11,9 +11,8 @@ namespace PuzzleSolver {
         static void Main(string[] args) {
             DX.ChangeWindowMode(true);
             if (DX.Init() == DX.Result.Error) Environment.Exit(-1);
-
+            DX.DrawLine(0, 0, 100, 100, new DX.Color(255, 255, 255));
             while(DX.ProcessMessage() == DX.Result.Success) {
-
             }
             DX.Finalize();
         }
