@@ -8,5 +8,7 @@ namespace PuzzleSolver
 {
 	class Point
 	{
+		double Re;		//x
+		double Im;		//y
 	}
 }

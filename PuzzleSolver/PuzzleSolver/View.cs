@@ -9,5 +9,6 @@ namespace PuzzleSolver
 {
 	class View
 	{
+		Puzzle puzzle;		//参照
 	}
 }

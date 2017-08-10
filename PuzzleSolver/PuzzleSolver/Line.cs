@@ -8,5 +8,6 @@ namespace PuzzleSolver
 {
 	class Line
 	{
+		Point start, end;
 	}
 }

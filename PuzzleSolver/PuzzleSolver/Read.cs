@@ -9,5 +9,6 @@ namespace PuzzleSolver
 {
 	class Read
 	{
+		Backup backup;		//参照. パズルの集合
 	}
 }

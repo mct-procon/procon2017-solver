@@ -53,6 +53,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backup.cs" />
+    <Compile Include="Controller.cs" />
+    <Compile Include="EvalNote.cs" />
+    <Compile Include="Line.cs" />
+    <Compile Include="MargePoly.cs" />
+    <Compile Include="Point.cs" />
+    <Compile Include="Poly.cs" />
+    <Compile Include="Puzzle.cs" />
+    <Compile Include="Solve.cs" />
     <Compile Include="View.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

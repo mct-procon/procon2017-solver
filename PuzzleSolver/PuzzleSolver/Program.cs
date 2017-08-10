@@ -9,6 +9,10 @@ namespace PuzzleSolver
 {
 	class Program
 	{
+		Read		read;			//実体. ファイル読み込み
+		Controller	controller;		//実体. 1問解く／表示する
+		Backup		backup;			//実体. パズルをStackで管理する
+
 		[STAThread]
 		static void Main(string[] args)
 		{
