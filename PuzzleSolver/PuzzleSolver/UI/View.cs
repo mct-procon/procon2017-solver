@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DxLib;
+using PuzzleSolver.Core;
 
-namespace PuzzleSolver
+namespace PuzzleSolver.UI
 {
-	class MargePoly
+	public class View
 	{
+		Puzzle puzzle;		//参照
 	}
 }

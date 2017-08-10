@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DxLib;
 
-namespace PuzzleSolver
+namespace PuzzleSolver.Geometry
 {
-	class View
+	public class Line
 	{
-		Puzzle puzzle;		//参照
+		public Point Start, End;
 	}
 }

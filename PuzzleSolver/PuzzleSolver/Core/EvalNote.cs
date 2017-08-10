@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuzzleSolver
+namespace PuzzleSolver.Core
 {
-	class EvalNote
+	public class EvalNote
 	{
 	}
 }

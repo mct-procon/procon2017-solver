@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DxLib;
+using PuzzleSolver.Core;
+using PuzzleSolver.Geometry;
+using PuzzleSolver.UI;
 
 namespace PuzzleSolver
 {

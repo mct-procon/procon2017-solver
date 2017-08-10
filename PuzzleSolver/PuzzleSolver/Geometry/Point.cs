@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuzzleSolver
+namespace PuzzleSolver.Geometry
 {
-	class Point
+	public class Point
 	{
-		double Re;		//x
-		double Im;		//y
+		public double Re;		//x
+		public double Im;		//y
 	}
 }

@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuzzleSolver
+namespace PuzzleSolver.Geometry
 {
-	class Line
+	public class MargePoly
 	{
-		Point start, end;
 	}
 }
