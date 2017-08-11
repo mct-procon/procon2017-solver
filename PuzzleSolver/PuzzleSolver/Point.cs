@@ -35,12 +35,13 @@ namespace PuzzleSolver
 		
 		public static int Ccw(Point a, Point b, Point c)
 		{
+			double eps = 1e-10;		//わずかな変化(浮動小数点数の誤差)を無視するための微小量.
 			b -= a;
 			c -= a;
-			if (Cross(b, c) > 0) { return +1; }	//counter clockwise
-			if (Cross(b, c) < 0) { return -1; }	//clockwise
-			if (Dot(b, c) < 0) { return +2; }	//c--a--b on line
-			if (b.Norm < c.Norm) { return -2; } //a--b--c on line
+			if (Cross(b, c) > eps)  { return +1; }	//counter clockwise
+			if (Cross(b, c) < -eps) { return -1; }	//clockwise
+			if (Dot(b, c) < -eps)   { return +2; }	//c--a--b on line
+			if (b.Norm < c.Norm) { return -2; }		//a--b--c on line
 			return 0;
 		}
 	}
