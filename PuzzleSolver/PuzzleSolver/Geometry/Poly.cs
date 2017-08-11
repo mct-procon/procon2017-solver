@@ -4,12 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuzzleSolver
+namespace PuzzleSolver.Geometry
 {
-	class Poly
+	public class Poly
 	{
-		public List<Point> points { get; private set; }		//点列(始点 = 終点). 実体.
-		public List<Line> lines { get; private set; }       //線分の集合. 実体.
+        /// <summary>
+        /// 点列(始点 = 終点). 実体.
+        /// </summary>
+		public List<Point> points { get; private set; }
+        /// <summary>
+        /// 線分の集合. 実体.
+        /// </summary>
+		public List<Line> lines { get; private set; }
 		private bool isPiece;
 
 		//コンストラクタ

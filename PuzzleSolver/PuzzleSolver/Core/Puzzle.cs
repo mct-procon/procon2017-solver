@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PuzzleSolver.Geometry;
 
-namespace PuzzleSolver
+namespace PuzzleSolver.Core
 {
-	class Puzzle
+	public class Puzzle
 	{
 		public List<Poly> wakus;		//実体. 枠の集合
 		public List<Poly> pieces;		//実体. ピースの集合
