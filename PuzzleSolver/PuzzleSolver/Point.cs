@@ -57,7 +57,10 @@ namespace PuzzleSolver
         /// </summary>
         public static double Cross (Point a, Point b) { return a.re * b.im - a.im * b.re; }
 		
-		public static int Ccw(Point a, Point b, Point c)
+		/// <summary>
+        /// 点の進行方向を判定する
+        /// </summary>
+        public static int Ccw(Point a, Point b, Point c)
 		{
 			b -= a;
 			c -= a;
