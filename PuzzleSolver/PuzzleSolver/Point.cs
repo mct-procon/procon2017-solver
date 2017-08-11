@@ -19,8 +19,10 @@ namespace PuzzleSolver
 		public static Point operator+ (Point a, Point b) { return new Point(a.re + a.im, b.re + b.im); }
 		public static Point operator- (Point a, Point b) { return new Point(a.re - a.im, b.re - b.im); }
 		public static Point operator* (Point a, double b) { return new Point(a.re * b, a.im * b); }
+		public static Point operator* (double a, Point b) { return new Point(b.re * a, b.im * a); }
 		public static Point operator* (Point a, Point b) { return new Point(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re); }
 		public static Point operator/ (Point a, double b) { return new Point(a.re / b, a.im / b); }
+		public static Point operator/ (double a, Point b) { return new Point(b.re / a, b.im / a); }
 		public static Point operator/ (Point a, Point b) { return new Point(a.re * b.re + a.im * b.im, a.im * b.re - a.re * b.im) / (b.re * b.re + b.im * b.im); }
 
 		//便利関数
