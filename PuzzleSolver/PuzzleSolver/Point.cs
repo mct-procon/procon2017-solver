@@ -8,12 +8,23 @@ namespace PuzzleSolver
 {
 	class Point
 	{
-		public double re { get; }
-		public double im { get; }
+		/// <summary>
+        /// 実部（X座標）
+        /// </summary>
+        public double re { get; }
+		/// <summary>
+        /// 虚部（Y座標）
+        /// </summary>
+        public double im { get; }
 
 		//コンストラクタ
 		public Point () {}
-		public Point (double Re, double Im) { re = Re; im = Im; }
+		/// <summary>
+        /// 初期化コンストラクタ
+        /// </summary>
+        /// <param name="Re">実部</param>
+        /// <param name="Im">虚部</param>
+        public Point (double Re, double Im) { re = Re; im = Im; }
 
 		//四則演算
 		public static Point operator+ (Point a, Point b) { return new Point(a.re + a.im, b.re + b.im); }
@@ -24,12 +35,27 @@ namespace PuzzleSolver
 		public static Point operator/ (Point a, Point b) { return new Point(a.re * b.re + a.im * b.im, a.im * b.re - a.re * b.im) / (b.re * b.re + b.im * b.im); }
 
 		//便利関数
-		public double Abs { get { return Math.Sqrt(re * re + im * im); } }
-		public double Norm { get { return re * re + im * im; } }
-		public Point Conj { get { return new Point(re, -im); } }
+		/// <summary>
+        /// ベクトルの大きさ（平方根の計算をするので速度が遅い、高速な計算が必要なときはNorm関数を使ってください）
+        /// </summary>
+        public double Abs { get { return Math.Sqrt(re * re + im * im); } }
+		/// <summary>
+        /// ベクトルの大きさの二乗
+        /// </summary>
+        public double Norm { get { return re * re + im * im; } }
+		/// <summary>
+        /// 共役複素数
+        /// </summary>
+        public Point Conj { get { return new Point(re, -im); } }
 
-		public static double Dot (Point a, Point b) { return a.re * b.re + a.im * b.im; }
-		public static double Cross (Point a, Point b) { return a.re * b.im - a.im * b.re; }
+		/// <summary>
+        /// ベクトルの内積
+        /// </summary>
+        public static double Dot (Point a, Point b) { return a.re * b.re + a.im * b.im; }
+		/// <summary>
+        /// ベクトルの外積
+        /// </summary>
+        public static double Cross (Point a, Point b) { return a.re * b.im - a.im * b.re; }
 		
 		public static int Ccw(Point a, Point b, Point c)
 		{
