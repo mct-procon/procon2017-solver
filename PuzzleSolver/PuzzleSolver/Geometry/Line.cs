@@ -9,7 +9,6 @@ namespace PuzzleSolver.Geometry
 {
 	public class Line
 	{
-<<<<<<< HEAD:PuzzleSolver/PuzzleSolver/Line.cs
 		public Point start { get; private set; }
 		public Point end { get; private set; }
 
@@ -45,8 +44,5 @@ namespace PuzzleSolver.Geometry
 			if (Point.Dot(start - end, point) < 0) { return (end - point).Abs; }
 			return Point.Cross(end - start, point) / (end - start).Abs;
 		}
-=======
-		public Point Start, End;
->>>>>>> 9468ea3bf42a32ff9725fd72add935489dd7cf7f:PuzzleSolver/PuzzleSolver/Geometry/Line.cs
 	}
 }
