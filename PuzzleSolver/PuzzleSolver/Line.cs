@@ -37,14 +37,6 @@ namespace PuzzleSolver
 			return true;
 		}
 
-		//交点(line1とline2は平行ではないとする)
-		public static Point CrossPoint(Line line1, Line line2)
-		{
-			double A = Point.Cross(line1.end - line1.start, line2.end - line2.start);
-			double B = Point.Cross(line1.end - line1.start, line1.end - line2.start);
-			return line2.start + B / A * (line2.end - line2.start);
-		}
-
 		//点と線分の距離
 		public double Distance(Point point)
 		{
