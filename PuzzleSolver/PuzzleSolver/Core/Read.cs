@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace PuzzleSolver
+namespace PuzzleSolver.Core
 {
-	class Read
+	public class Read
 	{
-		Backup backup;		//参照. パズルの集合
+		public Backup History;		//参照. パズルの集合
 	}
 }

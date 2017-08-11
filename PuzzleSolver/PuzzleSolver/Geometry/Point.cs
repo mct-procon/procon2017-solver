@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuzzleSolver
+namespace PuzzleSolver.Geometry
 {
-	class Point
+	public class Point
 	{
 		/// <summary>
         /// 実部（X座標）
