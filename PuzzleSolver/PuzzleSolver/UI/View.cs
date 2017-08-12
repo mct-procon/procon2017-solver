@@ -30,8 +30,8 @@ namespace PuzzleSolver.UI
 		//表示クエリ
 		public void Draw(Puzzle puzzle)
 		{
-			for (int i = 0; i < puzzle.wakus.Count; i++) { DrawPoly(puzzle.wakus[i]); }
-			for (int i = 0; i < puzzle.pieces.Count; i++) { DrawPoly(puzzle.pieces[i]); }
+			foreach(var waku in puzzle.wakus) { DrawPoly(waku); }
+			foreach(var piece in puzzle.pieces) { DrawPoly(piece); }
 		}
 
 		//変更クエリ (現在はキーボード操作のみですが, そのうち, マウス操作も入れると思います。）
@@ -55,10 +55,10 @@ namespace PuzzleSolver.UI
 			if (poly.isPiece) { color = new DX.Color(0, 255, 0); }
 			else { color = new DX.Color(255, 0, 255); }
 
-			for (int i = 0; i < poly.lines.Count; i++)
+            foreach (var line in poly.lines)
 			{
-				Point s = toDrawPoint(poly.lines[i].start);
-				Point e = toDrawPoint(poly.lines[i].end);
+				Point s = toDrawPoint(line.start);
+				Point e = toDrawPoint(line.end);
 				DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
 			}
 		}
