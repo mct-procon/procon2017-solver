@@ -27,8 +27,8 @@ namespace PuzzleSolver.Geometry
         /// <param name="Im">虚部</param>
         public Point (double Re, double Im) { this.Re = Re; this.Im = Im; }
 
-        public static Point operator+ (Point a, Point b) => new Point(a.Re + a.Im, b.Re + b.Im);
-        public static Point operator- (Point a, Point b) => new Point(a.Re - a.Im, b.Re - b.Im);
+        public static Point operator+ (Point a, Point b) => new Point(a.Re + b.Re, a.Im + b.Im);
+        public static Point operator- (Point a, Point b) => new Point(a.Re - b.Re, a.Im - b.Im);
         public static Point operator* (Point a, double b) => new Point(a.Re * b, a.Im * b);
         public static Point operator* (double a, Point b) => new Point(b.Re * a, b.Im * a);
         public static Point operator* (Point a, Point b) => new Point(a.Re * b.Re - a.Im * b.Im, a.Re * b.Im + a.Im * b.Re);
