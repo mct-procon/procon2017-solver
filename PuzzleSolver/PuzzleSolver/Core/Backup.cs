@@ -16,6 +16,9 @@ namespace PuzzleSolver.Core
         /// </summary>
 		private Stack<Puzzle> History;
 
+		//コンストラクタ
+		public Backup() { History = new Stack<Puzzle>(); }
+
         /// <summary>
 		/// 要素を入れる
         /// </summary>
