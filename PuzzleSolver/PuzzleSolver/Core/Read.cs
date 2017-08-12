@@ -23,11 +23,11 @@ namespace PuzzleSolver.Core
 		{
 			History.Clear();
 			try
-			{
+			{			
 				StreamReader reader = new StreamReader(fileName);
 				int n;
 				string s;
-				Puzzle puzzle = new Puzzle();
+				Puzzle puzzle = new Puzzle(new List<Poly>(), new List<Poly>(), new EvalNote());
 
 				//枠
 				s = ReadLine(reader);
