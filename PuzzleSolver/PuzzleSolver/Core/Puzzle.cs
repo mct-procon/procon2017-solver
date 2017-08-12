@@ -9,8 +9,8 @@ namespace PuzzleSolver.Core
 {
 	public class Puzzle
 	{
-		public List<Poly> wakus;		//実体. 枠の集合
-		public List<Poly> pieces;		//実体. ピースの集合
+		public List<Poly> wakus = new List<Poly>();		//実体. 枠の集合
+		public List<Poly> pieces = new List<Poly>();		//実体. ピースの集合
 		public EvalNote evalNote;		//実体. 評価値のメモ
 
 		//コンストラクタ

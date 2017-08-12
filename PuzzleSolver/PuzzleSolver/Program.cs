@@ -29,7 +29,7 @@ namespace PuzzleSolver
 			read = new Read(backup);
 			controller = new Controller(backup, new Point(0, 0), 5.0, 800, 600);
 
-			read.ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\sample.txt");
+            read.ReadFile("sample.txt");
 			controller.Solve();
 
 			DX.Finalize();
