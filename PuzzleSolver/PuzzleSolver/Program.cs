@@ -12,10 +12,10 @@ namespace PuzzleSolver
 {
 	class Program
 	{
-		Read		read;			//実体. ファイル読み込み
-		Controller	controller;		//実体. 1問解く／表示する
-		Backup		backup;			//実体. パズルをStackで管理する
-
+		static Backup backup;				//実体. パズルをStackで管理する
+		static Read read;					//実体. ファイル読み込み
+		static Controller	controller;		//実体. 1問解く／表示する
+		
 		[STAThread]
 		static void Main(string[] args)
 		{
@@ -25,11 +25,13 @@ namespace PuzzleSolver
 			if (DX.Init() == DX.Result.Error) Environment.Exit(-1);
 			DX.SetDrawScreen(DX.Screen.Back);
 
-			DX.WriteLineDx("{0} {1}", 123, "なにこれ？");
-			while(DX.ScreenFlip()==0 && DX.ProcessMessage()==0 && DX.ClearDrawScreen()==0 && !DX.CheckHitKey(DX.KeyInput.Escape)) {
-				DX.DrawCircle(300, 300, 50, new DX.Color(255, 0, 0), true);
-				DX.DrawLine(0, 0, 100, 100, new DX.Color(255, 0, 255));
-			}
+			backup = new Backup();
+			read = new Read(backup);
+			controller = new Controller(backup, new Point(0, 0), 5.0, 800, 600);
+
+			read.ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\sample.txt");
+			controller.Solve();
+
 			DX.Finalize();
 		}
 	}
