@@ -16,11 +16,11 @@ namespace PuzzleSolver.Geometry
         /// 線分の集合. 実体.
         /// </summary>
 		public List<Line> lines { get; private set; }
-		private bool isPiece;
+		public bool isPiece { get; }
 
 		//コンストラクタ
-		Poly() { }
-		Poly(List<Point> points, List<Line> lines, bool isPiece)
+		public Poly() { }
+		public Poly(List<Point> points, List<Line> lines, bool isPiece)
 		{
 			this.points  = points;
 			this.lines   = lines;
@@ -28,10 +28,10 @@ namespace PuzzleSolver.Geometry
 		}
 
 		//多角形の頂点数
-		int Count { get { return points.Count - 1; } }
+		public int Count { get { return points.Count - 1; } }
 
 		//面積
-		double Area
+		public double Area
 		{
 			get
 			{
@@ -46,7 +46,7 @@ namespace PuzzleSolver.Geometry
 		}
 
 		//線分が接触しているか
-		bool isHitLine(Poly poly)
+		public bool isHitLine(Poly poly)
 		{
 			for (int i = 0; i < Count; i++)
 			{
@@ -64,21 +64,21 @@ namespace PuzzleSolver.Geometry
 		}
 
 		//平行移動
-		void Trans(Point t, bool isUpdateLines)
+		public void Trans(Point t, bool isUpdateLines)
 		{
 			for (int i = 0; i < points.Count; i++) { points[i] += t; }
 			if (isUpdateLines) { for (int i = 0; i < lines.Count; i++) { lines[i].Trans(t); } }
 		}
 
 		//反転 (軸はy = 0)
-		void Reverse(bool isUpdateLines)
+		public void Reverse(bool isUpdateLines)
 		{
 			for (int i = 0; i < points.Count; i++) { points[i] = points[i].Conj; }
 			if (isUpdateLines) { for (int i = 0; i < lines.Count; i++) { lines[i].Reverse(); } }
 		}
 
 		//乗算 (回転)
-		void Mul (Point mulValue, bool isUpdateLines)
+		public void Mul (Point mulValue, bool isUpdateLines)
 		{
 			for (int i = 0; i < points.Count; i++) { points[i] = points[i] * mulValue; }
 			if (isUpdateLines) { for (int i = 0; i < lines.Count; i++) { lines[i].Mul(mulValue); } }
