@@ -24,7 +24,7 @@ namespace PuzzleSolver.Geometry
 		{
 			this.points  = points;
 			this.lines   = lines;
-			this.isPiece = isPiece; 
+			this.isPiece = isPiece;
 		}
 
 		//多角形の頂点数
