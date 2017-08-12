@@ -44,5 +44,11 @@ namespace PuzzleSolver.Core
                 History.Pop();
 			}
 		}
+
+		//要素を空にする
+		public void Clear()
+		{
+			History.Clear();
+		}
 	}
 }
