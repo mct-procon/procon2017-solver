@@ -37,7 +37,7 @@ namespace PuzzleSolver.Core
 				{
 					Poly poly = ReadPoly(reader, false);
 					if (poly == null) { return; }
-					puzzle.wakus.Add(poly);
+                    puzzle.wakus.Add(poly);
 				}
 
 				//ピース
