@@ -31,7 +31,7 @@ namespace PuzzleSolver.UI
 		public void Draw(Puzzle puzzle)
 		{	
 			for (int i = 0; i < puzzle.wakus.Count; i++) { DrawPoly(puzzle.wakus[i]); }
-			for (int i = 0; i < puzzle.pieces.Count; i++) { DrawPoly(puzzle.pieces[i]); }		
+			for (int i = 0; i < puzzle.pieces.Count; i++) { DrawPoly(puzzle.pieces[i]); }
 		}
 
 		//変更クエリ (現在はキーボード操作のみですが, そのうち, マウス操作も入れると思います。）
