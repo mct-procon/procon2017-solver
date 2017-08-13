@@ -22,41 +22,37 @@ namespace PuzzleSolver.Core
 		public void ReadFile(string fileName)
 		{
 			History.Clear();
-			try
-			{			
-				StreamReader reader = new StreamReader(fileName);
-				int n;
-				string s;
-				Puzzle puzzle = new Puzzle(new List<Poly>(), new List<Poly>(), new EvalNote());
+			StreamReader reader = new StreamReader(fileName);
+			int n;
+			string s;
+			Puzzle puzzle = new Puzzle(new List<Poly>(), new List<Poly>(), new EvalNote());
 
-				//枠
-				s = ReadLine(reader);
-				if (s == null) { return; }
-				n = int.Parse(s);
-				for (int i = 0; i < n; i++)
-				{
-					Poly poly = ReadPoly(reader, false);
-					if (poly == null) { return; }
-                    puzzle.wakus.Add(poly);
-				}
-
-				//ピース
-				s = ReadLine(reader);
-				if (s == null) { return; }
-				n = int.Parse(s);
-				for (int i = 0; i < n; i++)
-				{
-					Poly poly = ReadPoly(reader, true);
-					if (poly == null) { return; }
-					puzzle.pieces.Add(poly);
-				}
-
-				//パズルを突っ込む
-				History.Push(puzzle);
-
-				reader.Close();
+			//枠
+			s = ReadLine(reader);
+			if (s == null) { return; }
+			n = int.Parse(s);
+			for (int i = 0; i < n; i++)
+			{
+				Poly poly = ReadPoly(reader, false);
+				if (poly == null) { return; }
+                puzzle.wakus.Add(poly);
 			}
-			catch { DX.WriteLineDx("file open error"); }
+
+			//ピース
+			s = ReadLine(reader);
+			if (s == null) { return; }
+			n = int.Parse(s);
+			for (int i = 0; i < n; i++)
+			{
+				Poly poly = ReadPoly(reader, true);
+				if (poly == null) { return; }
+				puzzle.pieces.Add(poly);
+			}
+
+			//パズルを突っ込む
+			History.Push(puzzle);
+
+			reader.Close();
 		}
 
 		//多角形を読み込んで返す. エラー時はnullを返す.
