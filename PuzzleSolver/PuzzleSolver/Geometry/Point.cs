@@ -63,7 +63,7 @@ namespace PuzzleSolver.Geometry
         /// </summary>
         public static int Ccw(Point a, Point b, Point c)
         {
-            double eps = 1e-10;        //わずかな変化(浮動小数点数の誤差)を無視するための微小量.
+            const double eps = 1e-10;        //わずかな変化(浮動小数点数の誤差)を無視するための微小量.
             b -= a;
             c -= a;
             if (Cross(b, c) > eps)  { return +1; }    //counter clockwise
