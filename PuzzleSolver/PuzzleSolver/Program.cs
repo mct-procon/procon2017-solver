@@ -12,6 +12,9 @@ using Microsoft.Win32;
 
 namespace PuzzleSolver
 {
+    /// <summary>
+    /// メイン
+    /// </summary>
     class Program
     {
         static Backup backup;				//実体. パズルをStackで管理する
@@ -21,6 +24,10 @@ namespace PuzzleSolver
         static IntPtr MainWindowHWND;       //DxLibが作ったウィンドウのハンドル
         static NativeWindow MainWindow;
 
+        /// <summary>
+        /// メイン
+        /// </summary>
+        /// <param name="args">引数</param>
         [STAThread]
         static void Main(string[] args)
         {
@@ -47,6 +54,11 @@ namespace PuzzleSolver
             DX.Finalize();
         }
 
+        /// <summary>
+        /// 問題ファイルを読み込みます
+        /// </summary>
+        /// <param name="FilePath">読み込むファイルパス</param>
+        /// <returns>読み込みに成功したか</returns>
         static bool ReadFile(string FilePath) {
             try {
                 read.ReadFile(FilePath);
