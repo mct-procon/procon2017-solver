@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PuzzleSolver.Geometry;
 
 namespace PuzzleSolver.Geometry
 {
@@ -61,6 +62,22 @@ namespace PuzzleSolver.Geometry
 				}
 			}
 			return false;
+		}
+
+		//点pointが多角形thisの内部に含まれるか？ (境界はfalse)
+		public bool isCover(Point point)
+		{
+			bool flag = false;
+			double eps = 1e-10;
+			for (int i = 0; i < Count; i++)
+			{
+				Point a = points[i] - point;
+				Point b = points[i + 1] - point;
+				if (a.Im > b.Im) { Generic.Swap(ref a, ref b); }
+				if (a.Im <= 0 && 0 <= b.Im && Point.Cross(a, b) > eps) { flag = !flag; }
+				if (Point.Cross(a, b) == eps && Point.Dot(a, b) <= eps) { return false; }
+			}
+			return flag;
 		}
 
 		//平行移動
