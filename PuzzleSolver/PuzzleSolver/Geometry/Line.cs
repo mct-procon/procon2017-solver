@@ -23,7 +23,7 @@ namespace PuzzleSolver.Geometry
 		public void Mul(Point mulValue) { start *= mulValue; end *= mulValue; }
 
 		//反転（y=0が対称軸)
-		public void Reverse() { start = start.Conj; end = end.Conj; }
+		public void Turn() { start = start.Conj; end = end.Conj; }
 		
 		//当たり判定(T字, 同一直線上は交差とみなさない)
 		public static bool IsHit(Line line1, Line line2)
@@ -43,6 +43,12 @@ namespace PuzzleSolver.Geometry
 			if (Point.Dot(end - start, point) < 0) { return (start - point).Abs; }
 			if (Point.Dot(start - end, point) < 0) { return (end - point).Abs; }
 			return Point.Cross(end - start, point) / (end - start).Abs;
+		}
+
+		//クローン
+		public Line Clone()
+		{
+			return new Line(start, end);
 		}
 	}
 }
