@@ -21,5 +21,17 @@ namespace PuzzleSolver.Core
 			this.pieces = pieces;
 			this.evalNote = evalNote;
 		}
+
+		//クローン(深いコピー)
+		//evalNoteはまだ使っていないので, コピーしていません）
+		public Puzzle Clone()
+		{
+			Puzzle ret = new Puzzle();
+			ret.wakus  = new List<Poly>(this.wakus);
+			ret.pieces = new List<Poly>(this.pieces);
+			for (int i = 0; i < ret.wakus.Count; i++) { ret.wakus[i] = ret.wakus[i].Clone(); }
+			for (int i = 0; i < ret.pieces.Count; i++) { ret.pieces[i] = ret.pieces[i].Clone(); }
+			return ret;
+		}
 	}
 }
