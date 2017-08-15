@@ -55,11 +55,15 @@ namespace PuzzleSolver.UI
         }
 
         /// <summary>
-        /// ドロークエリ
+        /// 描画クエリ
         /// </summary>
         /// <param name="puzzle">描画するパズル</param>
         public void Draw(Puzzle puzzle)
         {	
+			//線分
+			for (int i = 0; i < puzzle.wakus.Count; i++) { for (int j = 0; j < puzzle.wakus[i].lines.Count; j++) { DrawLine(puzzle.wakus[i].lines[j]); } }
+			for (int i = 0; i < puzzle.pieces.Count; i++) { for (int j = 0; j < puzzle.pieces[i].lines.Count; j++) { DrawLine(puzzle.pieces[i].lines[j]); } }
+			//頂点列
             for (int i = 0; i < puzzle.wakus.Count; i++) { DrawPoly(puzzle.wakus[i]); }
             for (int i = 0; i < puzzle.pieces.Count; i++) { DrawPoly(puzzle.pieces[i]); }
         }
@@ -82,14 +86,14 @@ namespace PuzzleSolver.UI
         }
 
         /// <summary>
-        /// 多角形のドロークエリ
+        /// 多角形の描画クエリ
         /// Draw(Puzzle)の中で呼ばれます
         /// </summary>
         /// <param name="poly">描画する多角形</param>
         private void DrawPoly(Poly poly)
         {
             DX.Color color;
-            if (poly.isPiece) { color = new DX.Color(0, 255, 0); }
+            if (poly.isPiece) { color = new DX.Color(255, 0, 0); }
             else { color = new DX.Color(255, 0, 255); }
 
             for (int i = 0; i < poly.lines.Count; i++)
@@ -99,6 +103,16 @@ namespace PuzzleSolver.UI
                 DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
             }
         }
+
+		//線分の描画
+		private void DrawLine(Line line)
+		{
+			DX.Color color = new DX.Color(0, 255, 0);
+
+			Point s = toDrawPoint(line.start);
+			Point e = toDrawPoint(line.end);
+			DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
+		}
 
         /// <summary>
         /// 座標変換
