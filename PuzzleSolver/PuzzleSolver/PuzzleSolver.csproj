@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Backup.cs" />
+    <Compile Include="Geometry\Generic.cs" />
     <Compile Include="UI\Controller.cs" />
     <Compile Include="Core\EvalNote.cs" />
     <Compile Include="Geometry\Line.cs" />
