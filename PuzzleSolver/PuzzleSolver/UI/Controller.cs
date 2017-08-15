@@ -27,10 +27,23 @@ namespace PuzzleSolver.UI
 		//問題を解く
 		public void Solve()
 		{
-			while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape))
+			DX.KeyState key = new DX.KeyState();
+			DX.KeyState bkey = new DX.KeyState();
+
+			DX.GetHitKeyStateAll(ref key);
+
+			while (true)
 			{
-				view.Update();
-				view.Draw(History.Peek());
+				bkey = new DX.KeyState();
+				while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape))
+				{
+					view.Update();
+					view.Draw(History.Peek());
+				}
+
+				Puzzle puzzle = History.Peek().Clone();
+				puzzle = solve.ConnectAuto(puzzle);
+				History.Push(puzzle);
 			}
 		}
 	}
