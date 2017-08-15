@@ -12,18 +12,24 @@ namespace PuzzleSolver.Geometry
 		List<Point> pointList;
 		List<int>[] edgeTo;
 		List<bool>[] used;
+		Poly debugDstPoly;
+		Poly debugSrcPoly;
 
 		//2多角形をマージする。srcPolyが移動してきた多角形(ピースであることが保証される)
 		public List<Poly> Marge(Poly dstPoly, Poly srcPoly)
 		{
+			debugDstPoly = dstPoly;
+			debugSrcPoly = srcPoly;
 			pointList = new List<Point>();
 			for (int i = 0; i < dstPoly.Count; i++) { AddPointList(dstPoly.points[i]); }
 			for (int i = 0; i < srcPoly.Count; i++) { AddPointList(srcPoly.points[i]); }
 
 			edgeTo = new List<int>[pointList.Count];
+			for (int i = 0; i < pointList.Count; i++) { edgeTo[i] = new List<int>(); }
 			for (int i = 0; i < dstPoly.Count; i++) { AddEdgeTo(new Line(dstPoly.points[i], dstPoly.points[i + 1]), dstPoly, srcPoly); }
 			for (int i = 0; i < srcPoly.Count; i++) { AddEdgeTo(new Line(srcPoly.points[i], srcPoly.points[i + 1]), dstPoly, srcPoly); }
 			used = new List<bool>[pointList.Count];
+			for (int i = 0; i < pointList.Count; i++) { used[i] = new List<bool>(); }
 			for (int i = 0; i < pointList.Count; i++) { for (int j = 0; j < edgeTo[i].Count; i++) { used[i].Add(false); } }
 
 			//サイクル検出
@@ -67,12 +73,15 @@ namespace PuzzleSolver.Geometry
 			List<int> pointId = new List<int>();
 
 			for (int i = 0; i < pointList.Count; i++) { if (line.Distance(pointList[i]) <= eps) { pointId.Add(i); } }
-			pointId.Sort(delegate (int a, int b) {
-				double diff = (line.start - pointList[pointId[a]]).Norm - (line.start - pointList[pointId[b]]).Norm;
-				if (diff < 0) return -1;
-				if (diff == 0) return 0;
-				return 1;
-			});
+			for (int i = 0; i < pointId.Count - 1; i++)
+			{
+				for (int j = pointId.Count - 1; j > i; j--)
+				{
+					double a = (pointList[pointId[j - 1]] - line.start).Norm;
+					double b = (pointList[pointId[j]] - line.start).Norm;
+					if (a > b) { int t = pointId[j - 1]; pointId[j - 1] = pointId[j]; pointId[j] = t; }
+				}
+			}
 
 			double dist = 1e-2;
 			for (int i = 0; i < pointId.Count - 1; i++)

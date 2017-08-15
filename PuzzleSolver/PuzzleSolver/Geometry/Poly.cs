@@ -17,7 +17,7 @@ namespace PuzzleSolver.Geometry
         /// 線分の集合. 実体.
         /// </summary>
 		public List<Line> lines { get; private set; }
-		public bool isPiece { get; }
+		public bool isPiece;
 		public bool isExist;
 
 		//コンストラクタ
@@ -56,7 +56,7 @@ namespace PuzzleSolver.Geometry
 				Line line1 = new Line(points[i], points[i + 1]);
 				for (int j = 0; j < poly.Count; j++)
 				{
-					Line line2 = new Line(poly.points[i], poly.points[i + 1]);
+					Line line2 = new Line(poly.points[j], poly.points[j + 1]);
 					if (Line.IsHit(line1, line2))
 					{
 						return true;
@@ -166,6 +166,8 @@ namespace PuzzleSolver.Geometry
 			ret.lines = new List<Line>(this.lines);
 			ret.points = new List<Point>(this.points);
 			for (int i = 0; i < ret.lines.Count; i++) { ret.lines[i] = ret.lines[i].Clone(); }
+			ret.isPiece = this.isPiece;
+			ret.isExist = this.isExist;
 			return ret;
 		}
 	}

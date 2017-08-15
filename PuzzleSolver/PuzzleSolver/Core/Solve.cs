@@ -29,11 +29,12 @@ namespace PuzzleSolver.Core
 			for (int i = 0; i < polys.Count; i++) { scoreTable[i] = new T(-1, 0, new Poly(), -1, -1, -1, false); }
 
 			//2辺のくっつけ方をすべて試す
+			int bestScore = -1;
 			for (int dstPolyId = 0; dstPolyId < polys.Count; dstPolyId++)
 			{
 				Poly dstPoly = polys[dstPolyId];		
 				if (!dstPoly.isExist) { continue; }
-				for (int srcPolyId = 0; srcPolyId < polys.Count; srcPolyId++)
+				for (int srcPolyId = 0; srcPolyId < puzzle.pieces.Count; srcPolyId++)
 				{
 					Poly srcPoly = puzzle.pieces[srcPolyId];
 					if (!srcPoly.isExist) { continue; }
@@ -48,14 +49,12 @@ namespace PuzzleSolver.Core
 								int direction = option / 2;
 								bool turnflag = (option % 2 == 1);
 								int score = getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag);
+								bestScore = Math.Max(bestScore, score);
 
 								//スコアテーブルの更新
 								if (scoreTable[dstPolyId].Item1 < score)
 								{
-									if (!dstPoly.isPiece || margePoly.Marge(dstPoly, srcPoly).Count >= 1)
-									{
-										scoreTable[dstPolyId] = new T(score, 1, srcPoly, dstPointId, srcPointId, direction, turnflag);
-									}
+									scoreTable[dstPolyId] = new T(score, 1, srcPoly, dstPointId, srcPointId, direction, turnflag);
 								}
 								else if (scoreTable[dstPolyId].Item1 == score)
 								{
@@ -91,7 +90,8 @@ namespace PuzzleSolver.Core
 				if (turnflag) { srcPoly.Turn(true); }
 				move(dstPoly, srcPoly, dstPointId, srcPointId, direction, true);
 
-				List<Poly> margedPolyList = margePoly.Marge(srcPoly, dstPoly);
+				List<Poly> margedPolyList = margePoly.Marge(dstPoly, srcPoly);
+				DxLib.DX.WriteDx(margedPolyList.Count.ToString());
 				if (margedPolyList.Count > 0 && (!margedPolyList[0].isPiece || margedPolyList.Count == 1))
 				{
 					//リストに追加

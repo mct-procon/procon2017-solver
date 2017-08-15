@@ -27,19 +27,32 @@ namespace PuzzleSolver.UI
 		//問題を解く
 		public void Solve()
 		{
-			DX.KeyState key = new DX.KeyState();
-			DX.KeyState bkey = new DX.KeyState();
-
-			DX.GetHitKeyStateAll(ref key);
+			bool[] bkey = new bool[256];
+			bool[] key = new bool[256];
+			for (int i = 0; i < 256; i++) { key[i] = false; }
 
 			while (true)
 			{
-				bkey = new DX.KeyState();
+				bool breakFlag = false;
 				while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape))
 				{
+					for (int i = 0; i < 256; i++) { bkey[i] = key[i]; }
+					for (int i = 0; i < 256; i++) { key[i] = DX.CheckHitKey((DX.KeyInput)i); }
+
+					if (!bkey[(int)DX.KeyInput.NumPadEnter] && key[(int)DX.KeyInput.NumPadEnter])
+					{
+						breakFlag = true;
+						break;
+					}
+					if (!bkey[(int)DX.KeyInput.Back] && key[(int)DX.KeyInput.Back])
+					{
+						History.Pop();
+					}
+
 					view.Update();
 					view.Draw(History.Peek());
 				}
+				if (!breakFlag) { return; }
 
 				Puzzle puzzle = History.Peek().Clone();
 				puzzle = solve.ConnectAuto(puzzle);
