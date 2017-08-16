@@ -7,7 +7,7 @@ using PuzzleSolver.Geometry;
 
 namespace PuzzleSolver.Geometry
 {
-    public class Poly : ICloneable
+    public class Poly
     {
         /// <summary>
         /// 点列(始点 = 終点). 実体.
@@ -166,14 +166,6 @@ namespace PuzzleSolver.Geometry
             ret.isPiece = this.isPiece;
             ret.isExist = this.isExist;
             return ret;
-        }
-
-        /// <summary>
-        /// Deep Clone. (Called by ICloneable.Clone())
-        /// </summary>
-        /// <returns>Clone Object</returns>
-        object ICloneable.Clone() {
-            return Clone();
         }
     }
 }

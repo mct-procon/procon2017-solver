@@ -49,7 +49,7 @@ namespace PuzzleSolver.UI
                         breakFlag = true;
                         break;
                     }
-                    if (prev_key.Item1[DX.KeyInput.Back] && key.Item1[DX.KeyInput.Back])
+                    if (!prev_key.Item1[DX.KeyInput.Back] && key.Item1[DX.KeyInput.Back])
                     {
                         History.Pop();
                     }
