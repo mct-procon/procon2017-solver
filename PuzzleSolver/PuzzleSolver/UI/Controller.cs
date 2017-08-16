@@ -35,10 +35,13 @@ namespace PuzzleSolver.UI
             while (true)
             {
                 bool breakFlag = false;
-                while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape))
+                while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0)
                 {
                     prev_key = key;
                     key = DX.GetHitKeyStateAll();
+
+                    if (key.state[DX.KeyInput.Escape])
+                        return;
 
                     if (!prev_key.state[DX.KeyInput.NumPadEnter] && key.state[DX.KeyInput.NumPadEnter])
                     {
