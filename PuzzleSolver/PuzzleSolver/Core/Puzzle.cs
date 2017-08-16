@@ -7,31 +7,35 @@ using PuzzleSolver.Geometry;
 
 namespace PuzzleSolver.Core
 {
-	public class Puzzle
-	{
-		public List<Poly> wakus;		//実体. 枠の集合
-		public List<Poly> pieces;		//実体. ピースの集合
-		public EvalNote evalNote;		//実体. 評価値のメモ
+    public class Puzzle : ICloneable
+    {
+        public List<Poly> wakus;		//実体. 枠の集合
+        public List<Poly> pieces;		//実体. ピースの集合
+        public EvalNote evalNote;		//実体. 評価値のメモ
 
-		//コンストラクタ
-		public Puzzle() { }
-		public Puzzle(List<Poly> wakus, List<Poly> pieces, EvalNote evalNote)
-		{
-			this.wakus = wakus;
-			this.pieces = pieces;
-			this.evalNote = evalNote;
-		}
+        //コンストラクタ
+        public Puzzle() { }
+        public Puzzle(List<Poly> wakus, List<Poly> pieces, EvalNote evalNote)
+        {
+            this.wakus = wakus;
+            this.pieces = pieces;
+            this.evalNote = evalNote;
+        }
 
-		//クローン(深いコピー)
-		//evalNoteはまだ使っていないので, コピーしていません）
-		public Puzzle Clone()
-		{
-			Puzzle ret = new Puzzle();
-			ret.wakus  = new List<Poly>(this.wakus);
-			ret.pieces = new List<Poly>(this.pieces);
-			for (int i = 0; i < ret.wakus.Count; i++) { ret.wakus[i] = ret.wakus[i].Clone(); }
-			for (int i = 0; i < ret.pieces.Count; i++) { ret.pieces[i] = ret.pieces[i].Clone(); }
-			return ret;
-		}
-	}
+        //クローン(深いコピー)
+        //evalNoteはまだ使っていないので, コピーしていません）
+        public Puzzle Clone()
+        {
+            Puzzle ret = new Puzzle();
+            ret.wakus  = new List<Poly>(this.wakus.Count);
+            ret.pieces = new List<Poly>(this.pieces.Count);
+            for (int n = 0; n < ret.wakus.Count; ++n)
+                ret.wakus[n] = this.wakus[n].Clone();
+            for (int n = 0; n < ret.pieces.Count; ++n)
+                ret.pieces[n] = this.pieces[n].Clone();
+            return ret;
+        }
+
+        object ICloneable.Clone() => Clone();
+    }
 }
