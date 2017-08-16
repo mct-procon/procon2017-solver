@@ -41,6 +41,8 @@ namespace PuzzleSolver.Core
         /// Deep Clone.(Called by ICloneable.Clone())
         /// </summary>
         /// <returns>Clone</returns>
-        object ICloneable.Clone() => Clone();
+        object ICloneable.Clone() {
+            return Clone();
+        }
     }
 }

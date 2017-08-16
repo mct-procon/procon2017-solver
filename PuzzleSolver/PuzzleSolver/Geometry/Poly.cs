@@ -172,6 +172,8 @@ namespace PuzzleSolver.Geometry
         /// Deep Clone. (Called by ICloneable.Clone())
         /// </summary>
         /// <returns>Clone Object</returns>
-        object ICloneable.Clone() => Clone();
+        object ICloneable.Clone() {
+            return Clone();
+        }
     }
 }
