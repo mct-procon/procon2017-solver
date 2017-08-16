@@ -70,14 +70,13 @@ namespace PuzzleSolver.Geometry
 		public bool isCover(Point point)
 		{
 			bool flag = false;
-			double eps = 1e-10;
 			for (int i = 0; i < Count; i++)
 			{
 				Point a = points[i] - point;
 				Point b = points[i + 1] - point;
-				if (a.Im > b.Im) { Generic.Swap(ref a, ref b); }
-				if (a.Im <= 0 && 0 <= b.Im && Point.Cross(a, b) > eps) { flag = !flag; }
-				if (Point.Cross(a, b) == eps && Point.Dot(a, b) <= eps) { return false; }
+				if (a.Im > b.Im) { Point t = a;  a = b;  b = t; }
+				if (a.Im <= 0 && 0 < b.Im && Point.Cross(a, b) > 0) { flag = !flag; }
+				if (Math.Abs(Point.Cross(a, b)) == 0 && Point.Dot(a, b) <= 0) { return false; }
 			}
 			return flag;
 		}
