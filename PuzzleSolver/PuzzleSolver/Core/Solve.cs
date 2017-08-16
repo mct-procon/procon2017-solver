@@ -91,7 +91,7 @@ namespace PuzzleSolver.Core
 				move(dstPoly, srcPoly, dstPointId, srcPointId, direction, true);
 
 				List<Poly> margedPolyList = margePoly.Marge(dstPoly, srcPoly);
-				DxLib.DX.WriteDx(margedPolyList.Count.ToString());
+				DxLib.DX.WriteLineDx(margedPolyList.Count.ToString() + " " + getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag).ToString());
 				if (margedPolyList.Count > 0 && (!margedPolyList[0].isPiece || margedPolyList.Count == 1))
 				{
 					//リストに追加
@@ -99,11 +99,11 @@ namespace PuzzleSolver.Core
 					{
 						if (margedPolyList[i].isPiece)
 						{
-							puzzle.wakus.Add(margedPolyList[i]);
+							puzzle.pieces.Add(margedPolyList[i]);
 						}
 						else
 						{
-							puzzle.pieces.Add(margedPolyList[i]);
+							puzzle.wakus.Add(margedPolyList[i]);
 						}
 					}
 					//非アクティブにする
