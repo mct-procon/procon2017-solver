@@ -27,8 +27,9 @@ namespace PuzzleSolver.UI
         //問題を解く
         public void Solve()
         {
-            (DX.KeyState state, DX.Result) prev_key;
-            (DX.KeyState state, DX.Result) key;
+
+            ValueTuple<DX.KeyState, DX.Result> prev_key;
+            ValueTuple<DX.KeyState, DX.Result> key;
 
             key = DX.GetHitKeyStateAll();
 
@@ -40,15 +41,15 @@ namespace PuzzleSolver.UI
                     prev_key = key;
                     key = DX.GetHitKeyStateAll();
 
-                    if (key.state[DX.KeyInput.Escape])
+                    if (key.Item1[DX.KeyInput.Escape])
                         return;
 
-                    if (!prev_key.state[DX.KeyInput.NumPadEnter] && key.state[DX.KeyInput.NumPadEnter])
+                    if (!prev_key.Item1[DX.KeyInput.NumPadEnter] && key.Item1[DX.KeyInput.NumPadEnter])
                     {
                         breakFlag = true;
                         break;
                     }
-                    if (prev_key.state[DX.KeyInput.Back] && key.state[DX.KeyInput.Back])
+                    if (prev_key.Item1[DX.KeyInput.Back] && key.Item1[DX.KeyInput.Back])
                     {
                         History.Pop();
                     }
