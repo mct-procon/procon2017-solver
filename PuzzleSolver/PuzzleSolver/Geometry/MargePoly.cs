@@ -30,7 +30,7 @@ namespace PuzzleSolver.Geometry
 			for (int i = 0; i < srcPoly.Count; i++) { AddEdgeTo(new Line(srcPoly.points[i], srcPoly.points[i + 1]), dstPoly, srcPoly); }
 			used = new List<bool>[pointList.Count];
 			for (int i = 0; i < pointList.Count; i++) { used[i] = new List<bool>(); }
-			for (int i = 0; i < pointList.Count; i++) { for (int j = 0; j < edgeTo[i].Count; i++) { used[i].Add(false); } }
+			for (int i = 0; i < pointList.Count; i++) { for (int j = 0; j < edgeTo[i].Count; j++) { used[i].Add(false); } }
 
 			//サイクル検出
 			List<Poly> polys = new List<Poly>();
@@ -39,7 +39,7 @@ namespace PuzzleSolver.Geometry
 
 			for (int i = 0; i < pointList.Count; i++)
 			{
-				for (int j = 0; j < edgeTo[i].Count; i++)
+				for (int j = 0; j < edgeTo[i].Count; j++)
 				{
 					if (used[i][j]) { continue; }
 					polys.AddRange(getPolys(i, j, dstPoly.isPiece, lines));
@@ -73,6 +73,7 @@ namespace PuzzleSolver.Geometry
 			List<int> pointId = new List<int>();
 
 			for (int i = 0; i < pointList.Count; i++) { if (line.Distance(pointList[i]) <= eps) { pointId.Add(i); } }
+
 			for (int i = 0; i < pointId.Count - 1; i++)
 			{
 				for (int j = pointId.Count - 1; j > i; j--)
@@ -89,10 +90,11 @@ namespace PuzzleSolver.Geometry
 				Point a = pointList[pointId[i]];
 				Point b = pointList[pointId[i + 1]];
 				Point mid = (a + b) / 2;
-				Point l = (b - a) * new Point(0, 1);  l /= l.Abs; l *= dist; l += (a + b) / 2;
-				Point r = (b - a) * new Point(0, -1); r /= r.Abs; r *= dist; r += (a + b) / 2;
-				if (IsWall(dstPoly, srcPoly, l)) { edgeTo[pointId[i]].Add(pointId[i + 1]); }
-				if (IsWall(dstPoly, srcPoly, r)) { edgeTo[pointId[i + 1]].Add(pointId[i]); }
+				Point l = (b - a) * new Point(0, 1);  l /= l.Abs; l *= dist; l += mid;
+				Point r = (b - a) * new Point(0, -1); r /= r.Abs; r *= dist; r += mid;
+				//右手が壁じゃなかったら辺をはる
+				if (!IsWall(dstPoly, srcPoly, r)) { edgeTo[pointId[i]].Add(pointId[i + 1]); }
+				if (!IsWall(dstPoly, srcPoly, l)) { edgeTo[pointId[i + 1]].Add(pointId[i]); }
 			}
 		}
 	
@@ -163,8 +165,8 @@ namespace PuzzleSolver.Geometry
 		//cycleがvisual studio 2015のマークみたいな形になっていたら, 複数のサイクルに分解する。
 		private List<List<int>> BreakDownCycle(List<int> cycle)
 		{
-			bool[] visited = new bool[pointList.Count];
-			for (int i = 0; i < pointList.Count; i++) { visited[i] = false; }
+			int[] cnt = new int[pointList.Count];
+			for (int i = 0; i < pointList.Count; i++) { cnt[i] = 0; }
 
 			List<List<int>> cycles = new List<List<int>>();
 			Stack<int> stack = new Stack<int>();
@@ -172,15 +174,17 @@ namespace PuzzleSolver.Geometry
 			for (int i = 0; i < cycle.Count; i++)
 			{
 				stack.Push(cycle[i]);
-				if (visited[cycle[i]])  //値cycle[i]がstackに2個入っていたら
+				cnt[cycle[i]]++;
+				if (cnt[cycle[i]] == 2)  //値cycle[i]がstackに2個入っていたら
 				{
 					List<int> suzuki = new List<int>();
-					suzuki.Add(stack.Pop());
-					while (stack.Peek() != cycle[i]) { suzuki.Add(stack.Pop()); }
+					suzuki.Add(stack.Peek());
+					cnt[stack.Peek()]--;
+					stack.Pop();
+					while (stack.Peek() != cycle[i]) { suzuki.Add(stack.Peek()); cnt[stack.Peek()]--; stack.Pop(); }
 					suzuki.Add(stack.Peek());
 					cycles.Add(suzuki);
 				}
-				visited[cycle[i]] = true;
 			}
 			return cycles;
 		}

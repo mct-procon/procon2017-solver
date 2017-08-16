@@ -40,9 +40,9 @@ namespace PuzzleSolver.Geometry
 		//点と線分の距離
 		public double Distance(Point point)
 		{
-			if (Point.Dot(end - start, point) < 0) { return (start - point).Abs; }
-			if (Point.Dot(start - end, point) < 0) { return (end - point).Abs; }
-			return Point.Cross(end - start, point) / (end - start).Abs;
+			if (Point.Dot(end - start, point - start) <= 0) { return (start - point).Abs; }
+			if (Point.Dot(start - end, point - end) <= 0) { return (end - point).Abs; }
+			return Math.Abs(Point.Cross(end - start, point - start) / (end - start).Abs);
 		}
 
 		//クローン

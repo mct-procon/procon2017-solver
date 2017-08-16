@@ -29,13 +29,18 @@ namespace PuzzleSolver.Core
             Puzzle ret = new Puzzle();
             ret.wakus  = new List<Poly>(this.wakus.Count);
             ret.pieces = new List<Poly>(this.pieces.Count);
-            for (int n = 0; n < ret.wakus.Count; ++n)
-                ret.wakus[n] = this.wakus[n].Clone();
-            for (int n = 0; n < ret.pieces.Count; ++n)
-                ret.pieces[n] = this.pieces[n].Clone();
+            for (int n = 0; n < this.wakus.Count; ++n)
+                ret.wakus.Add(this.wakus[n]);
+            for (int n = 0; n < this.pieces.Count; ++n)
+                ret.pieces.Add(this.pieces[n]);
             return ret;
         }
 
+
+        /// <summary>
+        /// Deep Clone.(Called by ICloneable.Clone())
+        /// </summary>
+        /// <returns>Clone</returns>
         object ICloneable.Clone() => Clone();
     }
 }

@@ -66,7 +66,7 @@ namespace PuzzleSolver
             } catch (Exception ex) {
                 DX.WriteLineDx("File Input Error.\n{0}", ex);
                 DX.ScreenFlip();
-                if (MessageBox.Show(MainWindow, "sample.txtが読み込めませんでした．\n別のファイルを読み込みますか？", "エラー", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.Yes) {
+                if (MessageBox.Show(MainWindow, $"{FilePath}が読み込めませんでした．\n別のファイルを読み込みますか？", "エラー", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.Yes) {
                     OpenFileDialog openFileDialog = new OpenFileDialog();
                     openFileDialog.InitialDirectory = Environment.CurrentDirectory;
                     openFileDialog.Filter = "All Files|*.*";
