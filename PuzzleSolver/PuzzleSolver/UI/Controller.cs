@@ -60,7 +60,7 @@ namespace PuzzleSolver.UI
                 if (!breakFlag) { return; }
 
                 Puzzle puzzle = History.Peek().Clone();
-                puzzle = solve.ConnectAuto(puzzle);
+				puzzle = solve.ConnectAuto(puzzle);
                 History.Push(puzzle);
             }
         }

@@ -64,8 +64,8 @@ namespace PuzzleSolver.UI
 			for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; for (int j = 0; j < puzzle.wakus[i].lines.Count; j++) { DrawLine(puzzle.wakus[i].lines[j]); } }
 			for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; for (int j = 0; j < puzzle.pieces[i].lines.Count; j++) { DrawLine(puzzle.pieces[i].lines[j]); } }
 			//頂点列
-            for (int i = 0; i < puzzle.wakus.Count; i++) { DrawPoly(puzzle.wakus[i]); }
-            for (int i = 0; i < puzzle.pieces.Count; i++) { DrawPoly(puzzle.pieces[i]); }
+            for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; DrawPoly(puzzle.wakus[i]); }
+            for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; DrawPoly(puzzle.pieces[i]); }
         }
 
         /// <summary>
@@ -96,10 +96,10 @@ namespace PuzzleSolver.UI
             if (poly.isPiece) { color = new DX.Color(255, 0, 0); }
             else { color = new DX.Color(255, 0, 255); }
 
-            for (int i = 0; i < poly.lines.Count; i++)
+            for (int i = 0; i < poly.Count; i++)
             {
-                Point s = toDrawPoint(poly.lines[i].start);
-                Point e = toDrawPoint(poly.lines[i].end);
+                Point s = toDrawPoint(poly.points[i]);
+                Point e = toDrawPoint(poly.points[i + 1]);
                 DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
 				DX.DrawString((float)s.Re, (float)s.Im, 255, i.ToString());
             }
