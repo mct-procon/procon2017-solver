@@ -36,6 +36,7 @@ namespace PuzzleSolver.Geometry
 			List<Poly> polys = new List<Poly>();
 			List<Line> lines = dstPoly.lines;		//(表示用)線分の方は, 参照をコピーしておけばOk
 			lines.AddRange(srcPoly.lines);
+			lines = lines.Distinct().ToList<Line>();
 
 			for (int i = 0; i < pointList.Count; i++)
 			{
@@ -183,6 +184,7 @@ namespace PuzzleSolver.Geometry
 					stack.Pop();
 					while (stack.Peek() != cycle[i]) { suzuki.Add(stack.Peek()); cnt[stack.Peek()]--; stack.Pop(); }
 					suzuki.Add(stack.Peek());
+					suzuki.Reverse();
 					cycles.Add(suzuki);
 				}
 			}
