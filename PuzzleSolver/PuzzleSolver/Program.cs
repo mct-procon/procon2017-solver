@@ -45,7 +45,7 @@ namespace PuzzleSolver
             read = new Read(backup);
             controller = new Controller(backup, new Point(0, 0), 5.0, 800, 600);
 
-            if (!ReadFile("sample.txt"))
+			if (!ReadFile("sample.txt"))
                 return;
             DX.ClsDx();
 
