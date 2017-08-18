@@ -66,13 +66,21 @@ namespace PuzzleSolver.UI
 			//頂点列
             for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; DrawPoly(puzzle.wakus[i]); }
             for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; DrawPoly(puzzle.pieces[i]); }
+
+			//サイジング多角形（デバッグ）
+			/*for (int i = 0; i < puzzle.wakus.Count; i++)
+			{
+				List<Point> points = puzzle.wakus[i].SizingPoly();
+				Poly poly = new Poly(points, new List<Line>(), false);
+				DrawPoly(poly);
+			}*/
         }
 
         /// <summary>
         /// 更新クエリ
         /// （現在はキーボード操作のみですが, そのうち, マウス操作も入れると思います。）
         /// </summary>
-        public void Update()
+        public void UpdateDrawInfo()
         {
             //平行移動
             if (DX.CheckHitKey(DX.KeyInput.Up)) { CenterPoint += new Point(0, 3) / Scale; }
