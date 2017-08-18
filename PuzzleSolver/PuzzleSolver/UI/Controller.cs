@@ -54,7 +54,7 @@ namespace PuzzleSolver.UI
                         History.Pop();
                     }
 
-                    view.Update();
+                    view.UpdateDrawInfo();
                     view.Draw(History.Peek());
                 }
                 if (!breakFlag) { return; }
