@@ -51,7 +51,8 @@ namespace PuzzleSolver.Geometry
         //線分が接触しているか
         public bool isHitLine(Poly poly)
         {
-            for (int i = 0; i < Count; i++)
+			List<Point> points = SizingPoly();
+			for (int i = 0; i < Count; i++)
             {
                 Line line1 = new Line(points[i], points[i + 1]);
                 for (int j = 0; j < poly.Count; j++)
@@ -65,6 +66,31 @@ namespace PuzzleSolver.Geometry
             }
             return false;
         }
+
+		//多角形の縮小サイジング処理 (当たり判定で内部的に使う)
+		public List<Point> SizingPoly()
+		{
+			List<Point> ret = new List<Point>();
+			double dist = 1e-2;
+
+			for (int i = 0; i < Count; i++)
+			{
+				Point a = (i == 0) ? points[Count - 1] : points[i - 1];
+				Point b = points[i];
+				Point c = points[i + 1];
+
+				if (Point.Ccw(a, b, c) > 0)
+				{
+					ret.Add(b + ((a - b) / (a - b).Abs + (c - b) / (c - b).Abs) * dist);
+				}
+				else
+				{
+					ret.Add(b + ((b - a) / (b - a).Abs + (b - c) / (b - c).Abs) * dist);
+				}
+			}
+			ret.Add(ret[0]);
+			return ret;
+		}
 
         //点pointが多角形thisの内部に含まれるか？ (境界はfalse)
         public bool isCover(Point point) {
@@ -125,9 +151,13 @@ namespace PuzzleSolver.Geometry
             int[] weight = { 4, 1, 2, 3 };  //weight…各項目の点数重み (定数)
             Point a, b;
 
-            //走査1
-            while ((dstPoly[d] - srcPoly[s]).Norm <= eps) { d++; s--; }
-            count[0] += d - dstPointId - 1;
+			//走査1
+			int counter = 0;
+            while ((dstPoly[d] - srcPoly[s]).Norm <= eps && counter < dstPoly.Count) { d++; s--; counter++; }
+
+			//例外処理
+			if (counter == dstPoly.Count) { return dstPoly.Count * weight[0]; }	//完全一致
+			count[0] += d - dstPointId - 1;
 
             a = dstPoly[d] - dstPoly[d - 1];
             b = srcPoly[s] - srcPoly[s + 1];
