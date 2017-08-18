@@ -48,7 +48,8 @@ namespace PuzzleSolver.Geometry
 			}
 
 			//エラー処理
-			if (dstPoly.isPiece && polys.Count > 1) { return new List<Poly>(); }
+			if (dstPoly.isPiece && polys.Count > 1) { return new List<Poly>(); }	//2ピースの内部に穴があるケース
+			if (!dstPoly.isPiece && polys.Count == 0) { polys.Add(new Poly(new List<Point>(), lines, false)); return polys; }	//枠穴に完全にピースが収まったケース
 
 			//冗長点削除 + 辺生成
 			List<Poly> ret = new List<Poly>();
