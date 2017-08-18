@@ -29,7 +29,6 @@ namespace PuzzleSolver.Core
 			for (int i = 0; i < polys.Count; i++) { scoreTable[i] = new T(-1, 0, new Poly(), -1, -1, -1, false); }
 
 			//2辺のくっつけ方をすべて試す
-			int bestScore = -1;
 			for (int dstPolyId = 0; dstPolyId < polys.Count; dstPolyId++)
 			{
 				Poly dstPoly = polys[dstPolyId];		
@@ -49,7 +48,6 @@ namespace PuzzleSolver.Core
 								int direction = option / 2;
 								bool turnflag = (option % 2 == 1);
 								int score = getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag);
-								bestScore = Math.Max(bestScore, score);
 
 								//スコアテーブルの更新
 								if (scoreTable[dstPolyId].Item1 < score)
@@ -89,8 +87,10 @@ namespace PuzzleSolver.Core
 
 				if (turnflag) { srcPoly.Turn(true); }
 				move(dstPoly, srcPoly, dstPointId, srcPointId, direction, true);
-
 				List<Poly> margedPolyList = margePoly.Marge(dstPoly, srcPoly);
+
+				DxLib.DX.WriteLineDx("結合度 = " + scoreTable[rowId].Item1.ToString());
+
 				if (margedPolyList.Count > 0 && (!margedPolyList[0].isPiece || margedPolyList.Count == 1))
 				{
 					//リストに追加
