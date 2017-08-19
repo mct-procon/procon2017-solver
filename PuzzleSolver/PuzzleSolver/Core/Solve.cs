@@ -89,7 +89,7 @@ namespace PuzzleSolver.Core
 				move(dstPoly, srcPoly, dstPointId, srcPointId, direction, true);
 				List<Poly> margedPolyList = margePoly.Marge(dstPoly, srcPoly);
 
-				DxLib.DX.WriteLineDx("結合度 = " + scoreTable[rowId].Item1.ToString());
+				DxLib.DX.WriteLineDx("結合度 = " + scoreTable[rowId].Item1.ToString() + " 候補数 = " + scoreTable[rowId].Item2);
 
 				if (margedPolyList.Count > 0 && (!margedPolyList[0].isPiece || margedPolyList.Count == 1))
 				{

@@ -140,9 +140,53 @@ namespace PuzzleSolver.Geometry
         }
 
 
-        //結合度計算
+		//結合度計算
+		//ピース同士ならO(N + M), 枠にピースを入れる場合は枠をM角形としてO(NM) (定数軽い)
+		public static int Evaluation(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId)
+		{
+			if (dstPoly.isPiece) { return EvaluationSub(dstPoly, srcPoly, dstPointId, srcPointId); }
+			else
+			{
+				double eps = 1e-10;
+				bool[] calced = new bool[srcPoly.Count];
+				List<Tuple<Point, int>> pointList = new List<Tuple<Point, int>>();
+				int score = 0;
+
+				for (int i = 0; i < srcPoly.Count; i++) { calced[i] = false; }
+				for (int i = 0; i < dstPoly.Count; i++) {
+					pointList.Add(new Tuple<Point, int>(dstPoly.points[i], i));
+				}
+				pointList.Sort((a, b) => Point.Compare(a.Item1, b.Item1));
+
+				for (int i = 0; i < srcPoly.Count; i++)
+				{
+					if (calced[i]) { continue; }
+
+					int st = 0, ed = dstPoly.Count, mid;	//oooxxxx
+					while (ed - st >= 2)
+					{
+						mid = (st + ed) / 2;
+						if (Point.Compare(pointList[mid].Item1, srcPoly.points[i]) <= 0)
+						{
+							st = mid;
+						}
+						else
+						{
+							ed = mid;
+						}
+					}
+					if (st == dstPoly.Count || (srcPoly.points[i] - pointList[st].Item1).Norm > eps) { continue; }
+
+					//探索
+					score += EvaluationSub(dstPoly, srcPoly, pointList[st].Item2, i, calced);
+				}
+				return score;
+			}
+		}
+
+        //結合度計算のサブ（接している連続した部分1つについて、結合度を計算）
         //多角形dstPolyの頂点dstPointId, 多角形srcPolyの頂点srcPointIdが同じ位置にある。
-        public static int Evaluation(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId)
+        private static int EvaluationSub(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId, bool[] calced = null)
         {
             const double eps = 1e-10;
             int d = dstPointId;
@@ -153,7 +197,7 @@ namespace PuzzleSolver.Geometry
 
 			//走査1
 			int counter = 0;
-            while ((dstPoly[d] - srcPoly[s]).Norm <= eps && counter < dstPoly.Count) { d++; s--; counter++; }
+            while ((dstPoly[d] - srcPoly[s]).Norm <= eps && counter < dstPoly.Count) { if (calced != null) calced[toIndex(s, srcPoly.Count)] = true; d++; s--; counter++; }
 
 			//例外処理
 			if (counter == dstPoly.Count) { return dstPoly.Count * weight[0]; }	//完全一致
@@ -168,7 +212,7 @@ namespace PuzzleSolver.Geometry
 
             //走査2
             d = dstPointId; s = srcPointId;
-            while ((dstPoly[d] - srcPoly[s]).Norm <= eps) { d--; s++; }
+            while ((dstPoly[d] - srcPoly[s]).Norm <= eps) { if (calced != null) calced[toIndex(s, srcPoly.Count)] = true; d--; s++; }
             count[0] += s - srcPointId - 1;
 
             a = dstPoly[d] - dstPoly[d + 1];
@@ -185,6 +229,13 @@ namespace PuzzleSolver.Geometry
             for (int i = 0; i < 4; i++) { score += weight[i] * count[i]; }
             return score;
         }
+
+		//インデックス変換. 結合度計算で内部的に使う
+		private static int toIndex(int i, int Count)
+		{
+			i %= Count; if (i < 0) { i += Count; }
+			return i;
+		}
 
         //クローン (深いコピー)
         public Poly Clone()

@@ -72,5 +72,15 @@ namespace PuzzleSolver.Geometry
             if (b.Norm < c.Norm) { return -2; }        //a--b--c on line
             return 0;
         }
-    }
+
+		//比較関数 (Reが小さい順にソート. 同じならImが小さい順にソート)
+		public static int Compare(Point a, Point b)
+		{
+			if (a.Re == b.Re && a.Im == b.Im) { return 0; }
+			if (a.Re < b.Re) { return -1; }
+			if (a.Re > b.Re) { return 1; }
+			if (a.Im < b.Im) { return -1; }
+			return 1;
+		}
+	}
 }
