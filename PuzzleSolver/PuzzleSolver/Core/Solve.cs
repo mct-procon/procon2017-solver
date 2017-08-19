@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PuzzleSolver.Geometry;
-using T = System.Tuple<int, int, PuzzleSolver.Geometry.Poly, int, int, int, bool>;
+using T = System.Tuple<int, int, PuzzleSolver.Geometry.Poly, int, int, bool>;
 
 namespace PuzzleSolver.Core
 {
@@ -24,9 +24,17 @@ namespace PuzzleSolver.Core
 			List<Poly> polys = new List<Poly>(puzzle.wakus);
 			for (int i = 0; i < puzzle.pieces.Count; i++) { polys.Add(puzzle.pieces[i]); }
 
-			//scoreTable[i] = {dstPoly == polys[i]のときの, (scoreの最大値M, score==MになるようなsrcPoly(相方)の個数, score==MとなるsrcPoly, dstPointId, srcPointId, direction, turnflag)}
-			T[] scoreTable = new T[polys.Count];
-			for (int i = 0; i < polys.Count; i++) { scoreTable[i] = new T(-1, 0, new Poly(), -1, -1, -1, false); }
+			//scoreTable[dstPolyId, dstPointId] => polys[dstPolyId].points[dstPointId]に何かをくっつけたときの, 
+			//(scoreの最大値M, score==MになるようなsrcPoly(相方)の個数, score==MとなるsrcPoly, srcPointId, direction, turnflag)
+			Dictionary<Tuple<int, int>, T> scoreTable = new Dictionary<Tuple<int, int>, T>();
+			
+			for (int i = 0; i < polys.Count(); i++)
+			{
+				for (int j = 0; j < polys[i].Count; j++)
+				{
+					scoreTable.Add(new Tuple<int, int>(i, j), new T(-1, 0, null, -1, -1, false));
+				}
+			}
 
 			//2辺のくっつけ方をすべて試す
 			for (int dstPolyId = 0; dstPolyId < polys.Count; dstPolyId++)
@@ -50,14 +58,15 @@ namespace PuzzleSolver.Core
 								int score = getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag);
 
 								//スコアテーブルの更新
-								if (scoreTable[dstPolyId].Item1 < score)
+								Tuple<int, int> Key = new Tuple<int, int>(dstPolyId, dstPointId);
+								if (scoreTable[Key].Item1 < score)
 								{
-									scoreTable[dstPolyId] = new T(score, 1, srcPoly, dstPointId, srcPointId, direction, turnflag);
+									scoreTable[Key] = new T(score, 1, srcPoly, srcPointId, direction, turnflag);
 								}
-								else if (scoreTable[dstPolyId].Item1 == score)
+								else if (scoreTable[Key].Item1 == score)
 								{
-									scoreTable[dstPolyId] = new T(score, scoreTable[dstPolyId].Item2 + 1, scoreTable[dstPolyId].Item3,
-										scoreTable[dstPolyId].Item4, scoreTable[dstPolyId].Item5, scoreTable[dstPolyId].Item6, scoreTable[dstPolyId].Item7);
+									scoreTable[Key] = new T(score, scoreTable[Key].Item2 + 1, scoreTable[Key].Item3,
+										scoreTable[Key].Item4, scoreTable[Key].Item5, scoreTable[Key].Item6);
 								}
 							}
 						}
@@ -66,30 +75,31 @@ namespace PuzzleSolver.Core
 			}
 
 			//結合度最大のペアを探す
-			int rowId = 0;
-			for (int i = 1; i < polys.Count; i++)
+			Tuple<int, int> bestKey = new Tuple<int, int>(0, 0);
+			foreach (var element in scoreTable)
 			{
-				if (scoreTable[rowId].Item1 < scoreTable[i].Item1 || (scoreTable[rowId].Item1 == scoreTable[i].Item1 && scoreTable[rowId].Item2 > scoreTable[i].Item2))
+				if (scoreTable[bestKey].Item1 < element.Value.Item1 || (scoreTable[bestKey].Item1 == element.Value.Item1 && scoreTable[bestKey].Item2 > element.Value.Item2))
 				{
-					rowId = i;
+					bestKey = element.Key;
 				}
 			}
+			KeyValuePair<Tuple<int, int>, T> bestElement = new KeyValuePair<Tuple<int, int>, T>(bestKey, scoreTable[bestKey]);
 
 			//結合度最大のペアでくっつける
-			if (scoreTable[rowId].Item1 > 0)
+			if (bestElement.Value.Item1 > 0)
 			{
-				Poly dstPoly = polys[rowId];
-				Poly srcPoly = scoreTable[rowId].Item3;
-				int dstPointId = scoreTable[rowId].Item4;
-				int srcPointId = scoreTable[rowId].Item5;
-				int direction = scoreTable[rowId].Item6;
-				bool turnflag = scoreTable[rowId].Item7;
+				Poly dstPoly = polys[bestElement.Key.Item1];
+				int dstPointId = bestElement.Key.Item2;
+				Poly srcPoly = bestElement.Value.Item3;
+				int srcPointId = bestElement.Value.Item4;
+				int direction = bestElement.Value.Item5;
+				bool turnflag = bestElement.Value.Item6;
 
 				if (turnflag) { srcPoly.Turn(true); }
 				move(dstPoly, srcPoly, dstPointId, srcPointId, direction, true);
 				List<Poly> margedPolyList = margePoly.Marge(dstPoly, srcPoly);
 
-				DxLib.DX.WriteLineDx("結合度 = " + scoreTable[rowId].Item1.ToString() + " 候補数 = " + scoreTable[rowId].Item2);
+				DxLib.DX.WriteLineDx("結合度 = " + bestElement.Value.Item1.ToString() + " 候補数 = " + bestElement.Value.Item2.ToString());
 
 				if (margedPolyList.Count > 0 && (!margedPolyList[0].isPiece || margedPolyList.Count == 1))
 				{
