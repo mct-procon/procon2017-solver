@@ -23,6 +23,7 @@ namespace PuzzleSolver
 
         static IntPtr MainWindowHWND;       //DxLibが作ったウィンドウのハンドル
         static NativeWindow MainWindow;
+        static Network.WCF WCFServer;       //支援システムとの通信を管理するクラス．
 
         /// <summary>
         /// メイン
@@ -49,7 +50,12 @@ namespace PuzzleSolver
                 return;
             DX.ClsDx();
 
+            WCFServer = new Network.WCF();
+            WCFServer.Open();
+
             controller.Solve();
+
+            WCFServer.Close();
 
             DX.Finalize();
         }
