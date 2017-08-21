@@ -22,7 +22,7 @@ namespace PuzzleSolver
         static Controller	controller;		//実体. 1問解く／表示する
 
         static IntPtr MainWindowHWND;       //DxLibが作ったウィンドウのハンドル
-        static NativeWindow MainWindow;
+        static NativeWindow MainWindow;     //DxLibが作ったウィンドウ（MessageBox表示用）
         static Network.WCF WCFServer;       //支援システムとの通信を管理するクラス．
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace PuzzleSolver
             read = new Read(backup);
             controller = new Controller(backup, new Point(0, 0), 5.0, 800, 600);
 
-			if (!ReadFile("sample.txt"))
+            if (!ReadFile("sample.txt"))
                 return;
             DX.ClsDx();
 
