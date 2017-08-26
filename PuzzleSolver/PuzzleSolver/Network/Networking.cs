@@ -25,7 +25,7 @@ namespace PuzzleSolver.Network {
             // ...
         }
 
-        void IProconPuzzleService.QRCode(string code_string) {
+        void IProconPuzzleService.QRCode(QRCodeData data) {
             // ...
         }
     }
