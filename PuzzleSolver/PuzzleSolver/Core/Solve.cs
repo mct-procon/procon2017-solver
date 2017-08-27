@@ -37,6 +37,7 @@ namespace PuzzleSolver.Core
 			}
 
 			//2辺のくっつけ方をすべて試す
+			int bestScore = -1;
 			for (int dstPolyId = 0; dstPolyId < polys.Count; dstPolyId++)
 			{
 				Poly dstPoly = polys[dstPolyId];		
@@ -55,7 +56,8 @@ namespace PuzzleSolver.Core
 							{
 								int direction = option / 2;
 								bool turnflag = (option % 2 == 1);
-								int score = getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag);
+								int score = getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag, bestScore);
+								if (bestScore < score) { bestScore = score; }
 
 								//スコアテーブルの更新
 								Tuple<int, int> Key = new Tuple<int, int>(dstPolyId, dstPointId);
@@ -124,14 +126,13 @@ namespace PuzzleSolver.Core
 		}
 
 		//結合度を得る
-		private int getScore(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId, int direction, bool turnflag)
+		private int getScore(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId, int direction, bool turnflag, int bestScore)
 		{
 			List<Point> backupPointList = new List<Point>(srcPoly.points);
 			if (turnflag) { srcPoly.Turn(false); }
 			move(dstPoly, srcPoly, dstPointId, srcPointId, direction);
-			int score;
-			if (dstPoly.isHitLine(srcPoly)) { score = -1; }
-			else { score = Poly.Evaluation(dstPoly, srcPoly, dstPointId, srcPointId); }
+			int score = Poly.Evaluation(dstPoly, srcPoly, dstPointId, srcPointId);
+			if (score < bestScore || dstPoly.isHitLine(srcPoly)) { score = -1; }
 			srcPoly.points = backupPointList;
 			return score;
 		}
