@@ -10,7 +10,7 @@ namespace PuzzleSolver.Core
 {
 	public class Solve
 	{
-		private MargePoly margePoly;			//実体. 多角形マージ用の関数を集めた.
+		private MargePoly margePoly;            //実体. 多角形マージ用の関数を集めた.
 
 		//コンストラクタ
 		public Solve()
