@@ -69,9 +69,9 @@ namespace PuzzleSolver.Core
 			{
 				s = ReadLine(reader);
 				if (s == null) { return null; }
-				List<int> values = s.Split(' ').Select(x=>int.Parse(x)).ToList();
+				List<double> values = s.Split(' ').Select(x=>double.Parse(x)).ToList();
 				if (values.Count != 2) { return null; }
-				Point point = new Point((double)values[0], (double)values[1]);
+				Point point = new Point(values[0], values[1]);
 				points.Add(point);
 			}
 
