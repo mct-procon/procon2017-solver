@@ -66,14 +66,11 @@ namespace PuzzleSolver.UI
 			//頂点列
             for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; DrawPoly(puzzle.wakus[i]); }
             for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; DrawPoly(puzzle.pieces[i]); }
-
-			//サイジング多角形（デバッグ）
-			/*for (int i = 0; i < puzzle.wakus.Count; i++)
-			{
-				List<Point> points = puzzle.wakus[i].SizingPoly();
-				Poly poly = new Poly(points, new List<Line>(), false);
-				DrawPoly(poly);
-			}*/
+			//辺の数の総和
+			int edgeCount = 0;
+			for (int i = 0; i < puzzle.wakus.Count; i++) { edgeCount += puzzle.wakus[i].lines.Count; }
+			for (int i = 0; i < puzzle.pieces.Count; i++) { edgeCount += puzzle.pieces[i].lines.Count; }
+			DX.DrawString(500, 100, 0, "合計辺数 = " + edgeCount);
         }
 
         /// <summary>
@@ -109,7 +106,7 @@ namespace PuzzleSolver.UI
                 Point s = toDrawPoint(poly.points[i]);
                 Point e = toDrawPoint(poly.points[i + 1]);
                 DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
-				DX.DrawString((float)s.Re, (float)s.Im, 255, i.ToString());
+				if (i == 0) DX.DrawString((float)s.Re, (float)s.Im, 255, poly.lines.Count.ToString());
             }
         }
 
