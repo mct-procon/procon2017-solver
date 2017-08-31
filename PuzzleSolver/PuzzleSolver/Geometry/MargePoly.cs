@@ -34,8 +34,9 @@ namespace PuzzleSolver.Geometry
 
 			//サイクル検出
 			List<Poly> polys = new List<Poly>();
-			List<Line> lines = dstPoly.lines;		//(表示用)線分の方は, 参照をコピーしておけばOk
-			lines.AddRange(srcPoly.lines);
+			List<Line> lines = new List<Line>();		//(表示用)線分の方は, 参照をコピーしておけばOk
+			for (int i = 0; i < dstPoly.lines.Count; i++) { lines.Add(dstPoly.lines[i]); }
+			for (int i = 0; i < srcPoly.lines.Count; i++) { lines.Add(srcPoly.lines[i]); }
 			lines = lines.Distinct().ToList<Line>();
 
 			for (int i = 0; i < pointList.Count; i++)
