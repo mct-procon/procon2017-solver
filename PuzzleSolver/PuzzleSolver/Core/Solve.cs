@@ -77,14 +77,17 @@ namespace PuzzleSolver.Core
 			}
 
 			//結合度最大のペアを探す
-			Tuple<int, int> bestKey = new Tuple<int, int>(0, 0);
+			Tuple<int, int> bestKey = null;
+			bool firstUpdate = true;
 			foreach (var element in scoreTable)
 			{
-				if (scoreTable[bestKey].Item1 < element.Value.Item1 || (scoreTable[bestKey].Item1 == element.Value.Item1 && scoreTable[bestKey].Item2 > element.Value.Item2))
+				if (firstUpdate || scoreTable[bestKey].Item1 < element.Value.Item1 || (scoreTable[bestKey].Item1 == element.Value.Item1 && scoreTable[bestKey].Item2 > element.Value.Item2))
 				{
 					bestKey = element.Key;
+					firstUpdate = false;
 				}
 			}
+			if (firstUpdate) { return puzzle; }
 			KeyValuePair<Tuple<int, int>, T> bestElement = new KeyValuePair<Tuple<int, int>, T>(bestKey, scoreTable[bestKey]);
 
 			//結合度最大のペアでくっつける
@@ -118,21 +121,19 @@ namespace PuzzleSolver.Core
 							puzzle.wakus.Add(margedPolyList[i]);
 						}
 					}
-					//非アクティブにする
-					dstPoly.isExist = false;
-					srcPoly.isExist = false;
-					
+
 					//枠辺の更新
 					if (!dstPoly.isPiece)
 					{
-						puzzle.wakuLines.AddRange(srcPoly.lines);
+						for (int i = 0; i < srcPoly.lines.Count; i++)
+						{
+							puzzle.wakuLines.Add(srcPoly.lines[i].Clone());
+						}
 					}
 
-					//ピース辺の更新
-					if (pieceId >= puzzle.initPieceNum)
-					{
-						srcPoly.lines.Clear();
-					}
+					//非アクティブにする＆点列・表示辺を全部削除
+					dstPoly.isExist = false; dstPoly.lines.Clear(); dstPoly.points.Clear();
+					srcPoly.isExist = false; srcPoly.lines.Clear(); srcPoly.points.Clear();
 				}
 			}
 			return puzzle;

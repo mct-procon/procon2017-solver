@@ -44,7 +44,7 @@ namespace PuzzleSolver.Core
 			n = int.Parse(s);
 			for (int i = 0; i < n; i++)
 			{
-				Poly poly = ReadPoly(reader, true);
+				Poly poly = ReadPoly(reader, true, (sbyte)i);
 				if (poly == null) { return; }
 				puzzle.pieces.Add(poly);
 			}
@@ -54,7 +54,7 @@ namespace PuzzleSolver.Core
 			{
 				for (int j = 0; j < puzzle.wakus[i].Count; j++)
 				{
-					puzzle.wakuLines.Add(new Line(puzzle.wakus[i].points[j], puzzle.wakus[i].points[j + 1]));
+					puzzle.wakuLines.Add(new Line(puzzle.wakus[i].points[j], puzzle.wakus[i].points[j + 1], -1));
 				}
 			}
 
@@ -68,7 +68,7 @@ namespace PuzzleSolver.Core
 		}
 
 		//多角形を読み込んで返す. エラー時はnullを返す.
-		private Poly ReadPoly(StreamReader reader, bool isPiece)
+		private Poly ReadPoly(StreamReader reader, bool isPiece, sbyte initPieceId = -1)
 		{
 			string s = ReadLine(reader);
 			if (s == null) { return null; }
@@ -95,7 +95,7 @@ namespace PuzzleSolver.Core
 			{
 				for (int i = 0; i < points.Count - 1; i++)
 				{
-					lines.Add(new Line(points[i], points[i + 1]));
+					lines.Add(new Line(points[i], points[i + 1], initPieceId));
 				}
 			}
 

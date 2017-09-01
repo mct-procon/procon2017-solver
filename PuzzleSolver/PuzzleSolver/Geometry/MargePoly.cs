@@ -34,11 +34,11 @@ namespace PuzzleSolver.Geometry
 
 			//サイクル検出
 			List<Poly> polys = new List<Poly>();
-			List<Line> lines = new List<Line>();        //(表示用)線分の方は, 参照をコピーしておけばOk
+			List<Line> lines = new List<Line>();        //実体をコピーします！
 			if (dstPoly.isPiece)
 			{
-				for (int i = 0; i < dstPoly.lines.Count; i++) { lines.Add(dstPoly.lines[i]); }
-				for (int i = 0; i < srcPoly.lines.Count; i++) { lines.Add(srcPoly.lines[i]); }
+				for (int i = 0; i < dstPoly.lines.Count; i++) { lines.Add(dstPoly.lines[i].Clone()); }
+				for (int i = 0; i < srcPoly.lines.Count; i++) { lines.Add(srcPoly.lines[i].Clone()); }
 			}
 
 			for (int i = 0; i < pointList.Count; i++)
