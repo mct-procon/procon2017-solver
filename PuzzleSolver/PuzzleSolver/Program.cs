@@ -46,7 +46,7 @@ namespace PuzzleSolver
             read = new Read(backup);
             controller = new Controller(backup, new Point(0, 0), 5.0, 800, 600);
 
-            if (!ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Aoki\problem_6.txt"))
+            if (!ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\ProconSample\sample.txt"))
                 return;
             DX.ClsDx();
 

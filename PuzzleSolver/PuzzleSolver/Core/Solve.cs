@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PuzzleSolver.Geometry;
-using T = System.Tuple<int, int, PuzzleSolver.Geometry.Poly, int, int, bool>;
+using T = System.Tuple<int, int, int, int, int, bool>;
 
 namespace PuzzleSolver.Core
 {
@@ -32,7 +32,7 @@ namespace PuzzleSolver.Core
 			{
 				for (int j = 0; j < polys[i].Count; j++)
 				{
-					scoreTable.Add(new Tuple<int, int>(i, j), new T(-1, 0, null, -1, -1, false));
+					scoreTable.Add(new Tuple<int, int>(i, j), new T(-1, 0, -1, -1, -1, false));
 				}
 			}
 
@@ -63,7 +63,7 @@ namespace PuzzleSolver.Core
 								Tuple<int, int> Key = new Tuple<int, int>(dstPolyId, dstPointId);
 								if (scoreTable[Key].Item1 < score)
 								{
-									scoreTable[Key] = new T(score, 1, srcPoly, srcPointId, direction, turnflag);
+									scoreTable[Key] = new T(score, 1, srcPolyId, srcPointId, direction, turnflag);
 								}
 								else if (scoreTable[Key].Item1 == score)
 								{
@@ -92,7 +92,8 @@ namespace PuzzleSolver.Core
 			{
 				Poly dstPoly = polys[bestElement.Key.Item1];
 				int dstPointId = bestElement.Key.Item2;
-				Poly srcPoly = bestElement.Value.Item3;
+				int pieceId = bestElement.Value.Item3;
+				Poly srcPoly = puzzle.pieces[pieceId];
 				int srcPointId = bestElement.Value.Item4;
 				int direction = bestElement.Value.Item5;
 				bool turnflag = bestElement.Value.Item6;
@@ -120,6 +121,18 @@ namespace PuzzleSolver.Core
 					//非アクティブにする
 					dstPoly.isExist = false;
 					srcPoly.isExist = false;
+					
+					//枠辺の更新
+					if (!dstPoly.isPiece)
+					{
+						puzzle.wakuLines.AddRange(srcPoly.lines);
+					}
+
+					//ピース辺の更新
+					if (pieceId >= puzzle.initPieceNum)
+					{
+						srcPoly.lines.Clear();
+					}
 				}
 			}
 			return puzzle;

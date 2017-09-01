@@ -61,11 +61,13 @@ namespace PuzzleSolver.UI
         public void Draw(Puzzle puzzle)
         {	
 			//線分
-			for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; for (int j = 0; j < puzzle.wakus[i].lines.Count; j++) { DrawLine(puzzle.wakus[i].lines[j]); } }
+			for (int i = 0; i < puzzle.wakuLines.Count; i++) { DrawLine(puzzle.wakuLines[i]); }
 			for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; for (int j = 0; j < puzzle.pieces[i].lines.Count; j++) { DrawLine(puzzle.pieces[i].lines[j]); } }
 			//頂点列
             for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; DrawPoly(puzzle.wakus[i]); }
             for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; DrawPoly(puzzle.pieces[i]); }
+			//ピース番号
+			for (int i = 0; i < puzzle.initPieceNum; i++) { DrawPieceId(puzzle.pieces[i].lines, i); }
 			//辺の数の総和
 			int edgeCount = 0;
 			for (int i = 0; i < puzzle.wakus.Count; i++) { edgeCount += puzzle.wakus[i].lines.Count; }
@@ -106,7 +108,7 @@ namespace PuzzleSolver.UI
                 Point s = toDrawPoint(poly.points[i]);
                 Point e = toDrawPoint(poly.points[i + 1]);
                 DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
-				if (i == 0) DX.DrawString((float)s.Re, (float)s.Im, 255, poly.lines.Count.ToString());
+				//DX.DrawString((float)s.Re, (float)s.Im, 255, i.ToString());
             }
         }
 
@@ -118,6 +120,20 @@ namespace PuzzleSolver.UI
 			Point s = toDrawPoint(line.start);
 			Point e = toDrawPoint(line.end);
 			DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
+		}
+
+		//ピース番号の描画
+		private void DrawPieceId(List<Line> lines, int id)
+		{
+			Point p = new Point(0, 0);
+			for (int i = 0; i < lines.Count; i++)
+			{
+				p += lines[i].start;
+			}
+			p /= lines.Count;
+			p = toDrawPoint(p);
+
+			DX.DrawString((int)p.Re, (int)p.Im, new DX.Color(0, 0, 255), id.ToString());
 		}
 
         /// <summary>

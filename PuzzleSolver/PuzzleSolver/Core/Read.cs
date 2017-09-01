@@ -25,7 +25,7 @@ namespace PuzzleSolver.Core
 			StreamReader reader = new StreamReader(fileName);
 			int n;
 			string s;
-			Puzzle puzzle = new Puzzle(new List<Poly>(), new List<Poly>(), new EvalNote());
+			Puzzle puzzle = new Puzzle(new List<Poly>(), new List<Poly>(), new EvalNote(), new List<Line>());
 
 			//枠
 			s = ReadLine(reader);
@@ -48,6 +48,18 @@ namespace PuzzleSolver.Core
 				if (poly == null) { return; }
 				puzzle.pieces.Add(poly);
 			}
+
+			//枠辺
+			for (int i = 0; i < puzzle.wakus.Count; i++)
+			{
+				for (int j = 0; j < puzzle.wakus[i].Count; j++)
+				{
+					puzzle.wakuLines.Add(new Line(puzzle.wakus[i].points[j], puzzle.wakus[i].points[j + 1]));
+				}
+			}
+
+			//初期ピース数
+			puzzle.setInitPieceNum(puzzle.pieces.Count);
 
 			//パズルを突っ込む
 			History.Push(puzzle);
@@ -78,10 +90,13 @@ namespace PuzzleSolver.Core
 			//リング形式にする
 			points.Add(points[0]);
 
-			//表示する線分の設定
-			for (int i = 0; i < points.Count - 1; i++)
+			//表示する線分の設定 (ピースのみ)
+			if (isPiece)
 			{
-				lines.Add(new Line(points[i], points[i + 1]));
+				for (int i = 0; i < points.Count - 1; i++)
+				{
+					lines.Add(new Line(points[i], points[i + 1]));
+				}
 			}
 
 			return new Poly(points, lines, isPiece);
