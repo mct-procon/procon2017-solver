@@ -24,6 +24,8 @@ namespace PuzzleSolver.Core
 			List<Poly> polys = new List<Poly>(puzzle.wakus);
 			for (int i = 0; i < puzzle.pieces.Count; i++) { polys.Add(puzzle.pieces[i]); }
 
+			int t = 1000;
+
 			//scoreTable[dstPolyId, dstPointId] => polys[dstPolyId].points[dstPointId]に何かをくっつけたときの, 
 			//(scoreの最大値M, score==MになるようなsrcPoly(相方)の個数, score==MとなるsrcPoly, srcPointId, direction, turnflag)
 			Dictionary<Tuple<int, int>, T> scoreTable = new Dictionary<Tuple<int, int>, T>();
