@@ -89,7 +89,7 @@ namespace PuzzleSolver.Geometry
 				}
 			}
 
-			double dist = 1e-2;
+			double dist = 1e-6 * 5;
 			for (int i = 0; i < pointId.Count - 1; i++)
 			{
 				Point a = pointList[pointId[i]];
@@ -158,7 +158,20 @@ namespace PuzzleSolver.Geometry
 				{
 					if (!used[pos][i]) { break; }
 				}
-				if (i == edgeTo[pos].Count) { throw new Exception("多角形マージ処理：サイクルを検出できませんでした。"); }
+				if (i == edgeTo[pos].Count)
+				{
+					System.IO.StreamWriter writer = new System.IO.StreamWriter("margeErrorLog.txt");
+					writer.WriteLine(debugDstPoly.Count.ToString());
+					for (int id = 0; id < debugDstPoly.Count; id++) {
+						writer.WriteLine(debugDstPoly[id].Re.ToString() + " " + debugDstPoly[id].Im.ToString());
+					}
+					writer.WriteLine(debugSrcPoly.Count.ToString());
+					for (int id = 0; id < debugSrcPoly.Count; id++) {
+						writer.WriteLine(debugSrcPoly[id].Re.ToString() + " " + debugSrcPoly[id].Im.ToString());
+					}
+					writer.Close();
+					throw new Exception("多角形マージ処理：サイクルを検出できませんでした。");
+				}
 
 				used[pos][i] = true;
 				pos = edgeTo[pos][i];

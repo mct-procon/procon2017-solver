@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PuzzleSolver.Geometry;
-using T = System.Tuple<int, int, int, int, int, bool>;
 
 namespace PuzzleSolver.Core
 {
@@ -18,31 +17,15 @@ namespace PuzzleSolver.Core
 			margePoly = new MargePoly();
 		}
 
-		//全自動でくっつける
-		public Puzzle ConnectAuto(Puzzle puzzle)
+		//ビームサーチの次状態更新
+		public void SetNextStates(Puzzle puzzle, int beamWidth, SkewHeap heap, HashSet<long> puzzlesInHeap)
 		{
 			List<Poly> polys = new List<Poly>(puzzle.wakus);
 			for (int i = 0; i < puzzle.pieces.Count; i++) { polys.Add(puzzle.pieces[i]); }
 
-			int t = 1000;
-
-			//scoreTable[dstPolyId, dstPointId] => polys[dstPolyId].points[dstPointId]に何かをくっつけたときの, 
-			//(scoreの最大値M, score==MになるようなsrcPoly(相方)の個数, score==MとなるsrcPoly, srcPointId, direction, turnflag)
-			Dictionary<Tuple<int, int>, T> scoreTable = new Dictionary<Tuple<int, int>, T>();
-			
-			for (int i = 0; i < polys.Count(); i++)
-			{
-				for (int j = 0; j < polys[i].Count; j++)
-				{
-					scoreTable.Add(new Tuple<int, int>(i, j), new T(-1, 0, -1, -1, -1, false));
-				}
-			}
-
-			//2辺のくっつけ方をすべて試す
-			int bestScore = -1;
 			for (int dstPolyId = 0; dstPolyId < polys.Count; dstPolyId++)
 			{
-				Poly dstPoly = polys[dstPolyId];		
+				Poly dstPoly = polys[dstPolyId];
 				if (!dstPoly.isExist) { continue; }
 				for (int srcPolyId = 0; srcPolyId < puzzle.pieces.Count; srcPolyId++)
 				{
@@ -58,87 +41,30 @@ namespace PuzzleSolver.Core
 							{
 								int direction = option / 2;
 								bool turnflag = (option % 2 == 1);
-								int score = getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag, bestScore);
-								if (bestScore < score) { bestScore = score; }
+								int score = getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag, heap.Count == beamWidth ? heap.MinValue().boardScore + 1 - puzzle.boardScore : -1);
+								if (score < 0) { continue; }
 
-								//スコアテーブルの更新
-								Tuple<int, int> Key = new Tuple<int, int>(dstPolyId, dstPointId);
-								if (scoreTable[Key].Item1 < score)
-								{
-									scoreTable[Key] = new T(score, 1, srcPolyId, srcPointId, direction, turnflag);
-								}
-								else if (scoreTable[Key].Item1 == score)
-								{
-									scoreTable[Key] = new T(score, scoreTable[Key].Item2 + 1, scoreTable[Key].Item3,
-										scoreTable[Key].Item4, scoreTable[Key].Item5, scoreTable[Key].Item6);
-								}
+								Puzzle nextPuzzle = GetNextPuzzle(puzzle, dstPolyId, srcPolyId, dstPointId, srcPointId, direction, turnflag, score);
+								if (nextPuzzle == null || (puzzlesInHeap.Contains(nextPuzzle.boardHash) && nextPuzzle.boardHash != heap.MinValue().boardHash)) { continue; }
+								UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
 							}
 						}
 					}
 				}
 			}
+		}
 
-			//結合度最大のペアを探す
-			Tuple<int, int> bestKey = null;
-			bool firstUpdate = true;
-			foreach (var element in scoreTable)
+		//ビームの更新
+		private void UpdateBeam(SkewHeap heap, HashSet<long> puzzlesInHeap, Puzzle nextPuzzle, int beamWidth)
+		{
+			if (heap.Count == beamWidth)
 			{
-				if (firstUpdate || scoreTable[bestKey].Item1 < element.Value.Item1 || (scoreTable[bestKey].Item1 == element.Value.Item1 && scoreTable[bestKey].Item2 > element.Value.Item2))
-				{
-					bestKey = element.Key;
-					firstUpdate = false;
-				}
+				puzzlesInHeap.Remove(heap.MinValue().boardHash);
+				heap.Pop();
 			}
-			if (firstUpdate) { return puzzle; }
-			KeyValuePair<Tuple<int, int>, T> bestElement = new KeyValuePair<Tuple<int, int>, T>(bestKey, scoreTable[bestKey]);
 
-			//結合度最大のペアでくっつける
-			if (bestElement.Value.Item1 > 0)
-			{
-				Poly dstPoly = polys[bestElement.Key.Item1];
-				int dstPointId = bestElement.Key.Item2;
-				int pieceId = bestElement.Value.Item3;
-				Poly srcPoly = puzzle.pieces[pieceId];
-				int srcPointId = bestElement.Value.Item4;
-				int direction = bestElement.Value.Item5;
-				bool turnflag = bestElement.Value.Item6;
-
-				if (turnflag) { srcPoly.Turn(true); }
-				move(dstPoly, srcPoly, dstPointId, srcPointId, direction, true);
-				List<Poly> margedPolyList = margePoly.Marge(dstPoly, srcPoly);
-
-				//DxLib.DX.WriteLineDx("結合度 = " + bestElement.Value.Item1.ToString() + " 候補数 = " + bestElement.Value.Item2.ToString());
-
-				if (margedPolyList.Count > 0 && (!margedPolyList[0].isPiece || margedPolyList.Count == 1))
-				{
-					//リストに追加
-					for (int i = 0; i < margedPolyList.Count; i++)
-					{
-						if (margedPolyList[i].isPiece)
-						{
-							puzzle.pieces.Add(margedPolyList[i]);
-						}
-						else
-						{
-							puzzle.wakus.Add(margedPolyList[i]);
-						}
-					}
-
-					//枠辺の更新
-					if (!dstPoly.isPiece)
-					{
-						for (int i = 0; i < srcPoly.lines.Count; i++)
-						{
-							puzzle.wakuLines.Add(srcPoly.lines[i].Clone());
-						}
-					}
-
-					//非アクティブにする＆点列・表示辺を全部削除
-					dstPoly.isExist = false; dstPoly.lines.Clear(); dstPoly.points.Clear();
-					srcPoly.isExist = false; srcPoly.lines.Clear(); srcPoly.points.Clear();
-				}
-			}
-			return puzzle;
+			puzzlesInHeap.Add(nextPuzzle.boardHash);
+			heap.Push(nextPuzzle);
 		}
 
 		//結合度を得る
@@ -165,6 +91,58 @@ namespace PuzzleSolver.Core
 
 			Point t = dstPoly.points[dstPointId] - srcPoly.points[srcPointId];
 			srcPoly.Trans(t, isUpdateLines);
+		}
+
+
+		//結合後のパズルを得る。(マージ不可な場合は, nullを返す.) (使用時の前提：当たり判定は完了している)
+		//引数：結合前のPuzzle(const), くっつけ方, 結合度.
+		//dstPolyId … {枠0, 枠1, …, ピース0, ピース1, …}(0頂点の多角形含む)としたときに, 何番目の多角形にくっつけるか？ (0-indexed)
+		private Puzzle GetNextPuzzle(Puzzle puzzle, int dstPolyId, int srcPolyId, int dstPointId, int srcPointId, int direction, bool turnflag, int score)
+		{
+			Puzzle ret = puzzle.Clone();
+			Poly dstPoly, srcPoly;
+
+			if (dstPolyId < ret.wakus.Count) { dstPoly = ret.wakus[dstPolyId]; }
+			else { dstPoly = ret.pieces[dstPolyId - ret.wakus.Count]; }
+			srcPoly = ret.pieces[srcPolyId];
+
+			//ピースの移動
+			if (turnflag) { srcPoly.Turn(true); }
+			move(dstPoly, srcPoly, dstPointId, srcPointId, direction, true);
+
+			//マージ判定
+			List<Poly> polys = margePoly.Marge(dstPoly, srcPoly);
+			if (polys.Count == 0) { return null; }
+
+			//マージ処理
+			for (int i = 0; i < polys.Count; i++)
+			{
+				if (polys[i].isPiece)
+				{
+					ret.pieces.Add(polys[i]);
+				}
+				else
+				{
+					ret.wakus.Add(polys[i]);
+				}
+			}
+
+			if (!dstPoly.isPiece)
+			{
+				for (int i = 0; i < srcPoly.lines.Count; i++)
+				{
+					ret.wakuLines.Add(srcPoly.lines[i]);
+				}
+			}
+
+			dstPoly.isExist = false; dstPoly.points.Clear(); dstPoly.lines.Clear();
+			srcPoly.isExist = false; srcPoly.points.Clear(); srcPoly.lines.Clear();
+
+			//盤面評価, ハッシュの登録
+			ret.setBoardScore(puzzle.boardScore + score);
+			ret.setBoardHash();
+
+			return ret;
 		}
 	}
 }
