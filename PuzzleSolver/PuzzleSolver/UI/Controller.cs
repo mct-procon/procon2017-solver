@@ -68,6 +68,13 @@ namespace PuzzleSolver.UI
 
 					//表示したいパズルを渡す
                     view.Draw(States[nowDepth].MaxValue());
+
+					//デバッグとして、ビームサーチの評価値を表示してみよう。
+					SkewHeap hoge = States[nowDepth].CloneShallow();
+					while (hoge.Count > 0)
+					{
+						DX.DrawString(100 + (hoge.Count / 25) * 400, 200 + (hoge.Count % 25) * 22, 0, hoge.Pop().boardScore.ToString());
+					}
                 }
                 if (!breakFlag) { return; }
 
