@@ -61,14 +61,15 @@ namespace PuzzleSolver.UI
         public void Draw(Puzzle puzzle)
         {	
 			//線分
-			for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; for (int j = 0; j < puzzle.wakus[i].lines.Count; j++) { DrawLine(puzzle.wakus[i].lines[j]); } }
+			for (int i = 0; i < puzzle.wakuLines.Count; i++) { DrawLine(puzzle.wakuLines[i]); }
 			for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; for (int j = 0; j < puzzle.pieces[i].lines.Count; j++) { DrawLine(puzzle.pieces[i].lines[j]); } }
 			//頂点列
             for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; DrawPoly(puzzle.wakus[i]); }
             for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; DrawPoly(puzzle.pieces[i]); }
+			//ピース番号
+			DrawPieceIds(puzzle);
 			//辺の数の総和
-			int edgeCount = 0;
-			for (int i = 0; i < puzzle.wakus.Count; i++) { edgeCount += puzzle.wakus[i].lines.Count; }
+			int edgeCount = puzzle.wakuLines.Count;
 			for (int i = 0; i < puzzle.pieces.Count; i++) { edgeCount += puzzle.pieces[i].lines.Count; }
 			DX.DrawString(500, 100, 0, "合計辺数 = " + edgeCount);
         }
@@ -106,7 +107,7 @@ namespace PuzzleSolver.UI
                 Point s = toDrawPoint(poly.points[i]);
                 Point e = toDrawPoint(poly.points[i + 1]);
                 DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
-				if (i == 0) DX.DrawString((float)s.Re, (float)s.Im, 255, poly.lines.Count.ToString());
+				//DX.DrawString((float)s.Re, (float)s.Im, 255, i.ToString());
             }
         }
 
@@ -118,6 +119,45 @@ namespace PuzzleSolver.UI
 			Point s = toDrawPoint(line.start);
 			Point e = toDrawPoint(line.end);
 			DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
+		}
+
+		//ピース番号の描画
+		private void DrawPieceIds(Puzzle puzzle)
+		{
+			Point[] p = new Point[puzzle.initPieceNum]; //重心
+			int[] cnt = new int[puzzle.initPieceNum];   //頂点数
+			int i, j;
+
+			for (i = 0; i < puzzle.initPieceNum; i++)
+			{
+				p[i] = new Point(0, 0);
+				cnt[i] = 0;
+			}
+
+			for (i = 0; i < puzzle.wakuLines.Count; i++)
+			{
+				Line line = puzzle.wakuLines[i];
+				if (line.initPieceId < 0) { continue; }
+				p[line.initPieceId] += line.start;
+				cnt[line.initPieceId]++;
+			}
+
+			for (i = 0; i < puzzle.pieces.Count; i++)
+			{
+				for (j = 0; j < puzzle.pieces[i].lines.Count; j++)
+				{
+					Line line = puzzle.pieces[i].lines[j];
+					p[line.initPieceId] += line.start;
+					cnt[line.initPieceId]++;
+				}
+			}
+
+			for (i = 0; i < puzzle.initPieceNum; i++)
+			{
+				p[i] /= cnt[i];
+				p[i] = toDrawPoint(p[i]);
+				DX.DrawString((int)p[i].Re, (int)p[i].Im, new DX.Color(0, 0, 255), i.ToString());
+			}
 		}
 
         /// <summary>

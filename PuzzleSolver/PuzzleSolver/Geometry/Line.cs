@@ -11,10 +11,12 @@ namespace PuzzleSolver.Geometry
 	{
 		public Point start { get; private set; }
 		public Point end { get; private set; }
+		public sbyte initPieceId { get; }		//最初何番のピースにあった辺か？ピース以外ならドントケア。(ピース番号の表示で使う）
 
 		//コンストラクタ
-		public Line() {}
+		public Line() { }
 		public Line(Point s, Point e) { start = s; end = e; }
+		public Line(Point s, Point e, sbyte initPieceId) { start = s;  end = e;  this.initPieceId = initPieceId; }
 
 		//平行移動
 		public void Trans(Point t) { start += t; end += t; }
@@ -48,7 +50,7 @@ namespace PuzzleSolver.Geometry
 		//クローン
 		public Line Clone()
 		{
-			return new Line(start, end);
+			return new Line(start, end, initPieceId);
 		}
 	}
 }

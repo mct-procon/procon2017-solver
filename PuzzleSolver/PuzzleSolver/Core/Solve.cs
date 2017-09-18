@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PuzzleSolver.Geometry;
-using T = System.Tuple<int, int, PuzzleSolver.Geometry.Poly, int, int, bool>;
+using T = System.Tuple<int, int, int, int, int, bool>;
 
 namespace PuzzleSolver.Core
 {
@@ -32,7 +32,7 @@ namespace PuzzleSolver.Core
 			{
 				for (int j = 0; j < polys[i].Count; j++)
 				{
-					scoreTable.Add(new Tuple<int, int>(i, j), new T(-1, 0, null, -1, -1, false));
+					scoreTable.Add(new Tuple<int, int>(i, j), new T(-1, 0, -1, -1, -1, false));
 				}
 			}
 
@@ -63,7 +63,7 @@ namespace PuzzleSolver.Core
 								Tuple<int, int> Key = new Tuple<int, int>(dstPolyId, dstPointId);
 								if (scoreTable[Key].Item1 < score)
 								{
-									scoreTable[Key] = new T(score, 1, srcPoly, srcPointId, direction, turnflag);
+									scoreTable[Key] = new T(score, 1, srcPolyId, srcPointId, direction, turnflag);
 								}
 								else if (scoreTable[Key].Item1 == score)
 								{
@@ -77,14 +77,17 @@ namespace PuzzleSolver.Core
 			}
 
 			//結合度最大のペアを探す
-			Tuple<int, int> bestKey = new Tuple<int, int>(0, 0);
+			Tuple<int, int> bestKey = null;
+			bool firstUpdate = true;
 			foreach (var element in scoreTable)
 			{
-				if (scoreTable[bestKey].Item1 < element.Value.Item1 || (scoreTable[bestKey].Item1 == element.Value.Item1 && scoreTable[bestKey].Item2 > element.Value.Item2))
+				if (firstUpdate || scoreTable[bestKey].Item1 < element.Value.Item1 || (scoreTable[bestKey].Item1 == element.Value.Item1 && scoreTable[bestKey].Item2 > element.Value.Item2))
 				{
 					bestKey = element.Key;
+					firstUpdate = false;
 				}
 			}
+			if (firstUpdate) { return puzzle; }
 			KeyValuePair<Tuple<int, int>, T> bestElement = new KeyValuePair<Tuple<int, int>, T>(bestKey, scoreTable[bestKey]);
 
 			//結合度最大のペアでくっつける
@@ -92,7 +95,8 @@ namespace PuzzleSolver.Core
 			{
 				Poly dstPoly = polys[bestElement.Key.Item1];
 				int dstPointId = bestElement.Key.Item2;
-				Poly srcPoly = bestElement.Value.Item3;
+				int pieceId = bestElement.Value.Item3;
+				Poly srcPoly = puzzle.pieces[pieceId];
 				int srcPointId = bestElement.Value.Item4;
 				int direction = bestElement.Value.Item5;
 				bool turnflag = bestElement.Value.Item6;
@@ -101,7 +105,7 @@ namespace PuzzleSolver.Core
 				move(dstPoly, srcPoly, dstPointId, srcPointId, direction, true);
 				List<Poly> margedPolyList = margePoly.Marge(dstPoly, srcPoly);
 
-				DxLib.DX.WriteLineDx("結合度 = " + bestElement.Value.Item1.ToString() + " 候補数 = " + bestElement.Value.Item2.ToString());
+				//DxLib.DX.WriteLineDx("結合度 = " + bestElement.Value.Item1.ToString() + " 候補数 = " + bestElement.Value.Item2.ToString());
 
 				if (margedPolyList.Count > 0 && (!margedPolyList[0].isPiece || margedPolyList.Count == 1))
 				{
@@ -117,9 +121,19 @@ namespace PuzzleSolver.Core
 							puzzle.wakus.Add(margedPolyList[i]);
 						}
 					}
-					//非アクティブにする
-					dstPoly.isExist = false;
-					srcPoly.isExist = false;
+
+					//枠辺の更新
+					if (!dstPoly.isPiece)
+					{
+						for (int i = 0; i < srcPoly.lines.Count; i++)
+						{
+							puzzle.wakuLines.Add(srcPoly.lines[i].Clone());
+						}
+					}
+
+					//非アクティブにする＆点列・表示辺を全部削除
+					dstPoly.isExist = false; dstPoly.lines.Clear(); dstPoly.points.Clear();
+					srcPoly.isExist = false; srcPoly.lines.Clear(); srcPoly.points.Clear();
 				}
 			}
 			return puzzle;
