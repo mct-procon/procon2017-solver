@@ -31,7 +31,7 @@ namespace PuzzleSolver.Core
 				{
 					Poly srcPoly = puzzle.pieces[srcPolyId];
 					if (!srcPoly.isExist) { continue; }
-					if (dstPoly.points == srcPoly.points) { continue; }
+					if (dstPoly == srcPoly) { continue; }
 
 					for (int dstPointId = 0; dstPointId < dstPoly.Count; dstPointId++)
 					{
@@ -45,13 +45,25 @@ namespace PuzzleSolver.Core
 								if (score < 0) { continue; }
 
 								Puzzle nextPuzzle = GetNextPuzzle(puzzle, dstPolyId, srcPolyId, dstPointId, srcPointId, direction, turnflag, score);
-								if (nextPuzzle == null || (puzzlesInHeap.Contains(nextPuzzle.boardHash) && nextPuzzle.boardHash != heap.MinValue().boardHash)) { continue; }
-								UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
+								if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
+								{
+									UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
+								}
 							}
 						}
 					}
 				}
 			}
+		}
+
+		//ビームを更新するか
+		private bool IsUpdateBeam(SkewHeap heap, HashSet<long> puzzlesInHeap, Puzzle nextPuzzle, int beamWidth)
+		{
+			if (nextPuzzle == null) { return false; }
+			if (!puzzlesInHeap.Contains(nextPuzzle.boardHash)) { return true; }
+			if (heap.Count < beamWidth) { return false; }
+			if (nextPuzzle.boardHash == heap.MinValue().boardHash) { return true; }
+			return false;
 		}
 
 		//ビームの更新

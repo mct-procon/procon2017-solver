@@ -70,8 +70,8 @@ namespace PuzzleSolver.Core
 			int i, j;
 			List<Line> lines = new List<Line>();
 			
-			for (i = 0; i < wakus.Count; i++) { for (j = 0; j < wakus[i].Count; j++) { lines.Add(new Line(wakus[i].points[j], wakus[i].points[j + 1])); } }
-			for (i = 0; i < pieces.Count; i++) { for (j = 0; j < pieces[i].Count; j++) { lines.Add(new Line(pieces[i].points[j], pieces[i].points[j + 1])); } }
+			for (i = 0; i < wakus.Count; i++) { if (!wakus[i].isExist) continue; for (j = 0; j < wakus[i].Count; j++) { lines.Add(new Line(wakus[i].points[j], wakus[i].points[j + 1])); } }
+			for (i = 0; i < pieces.Count; i++) { if (!pieces[i].isExist) continue; for (j = 0; j < pieces[i].Count; j++) { lines.Add(new Line(pieces[i].points[j], pieces[i].points[j + 1])); } }
 			lines.Sort((a, b) => Point.Compare(a.start, b.start) != 0 ? Point.Compare(a.start, b.start) : Point.Compare(a.end, b.end));
 
 			long mul1 = 1, sum1 = 0;

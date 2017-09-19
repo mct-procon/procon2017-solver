@@ -31,7 +31,7 @@ namespace PuzzleSolver.UI
             ValueTuple<DX.KeyState, DX.Result> prev_key;
             ValueTuple<DX.KeyState, DX.Result> key;
 			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 50;
+			int beamWidth = 1;
 			int nowDepth = 0;
 			int maxDepth = initialPuzzle.wakus.Count + initialPuzzle.pieces.Count - 1;
 
@@ -88,7 +88,11 @@ namespace PuzzleSolver.UI
 					while (States[nowDepth].Count > 0)
 					{
 						Puzzle nowPuzzle = States[nowDepth].Pop().Clone();
-						solve.SetNextStates(nowPuzzle, beamWidth, States[nowDepth + 1], puzzlesInHeap);
+
+						int doBeamWidth = beamWidth;
+						//if (nowDepth % 6 == 0) { doBeamWidth = 3; }
+
+						solve.SetNextStates(nowPuzzle, doBeamWidth, States[nowDepth + 1], puzzlesInHeap);
 					}
 					States[nowDepth] = backupLogForDisplay;
 					if (States[nowDepth + 1].Count > 0) { nowDepth++; }

@@ -30,7 +30,11 @@ namespace PuzzleSolver.Core
 			{
 				Poly poly = ReadPoly(reader, false);
 				if (poly == null) { return null; }
-                puzzle.wakus.Add(poly);
+
+				//時計回りの頂点列にする
+				if (poly.Area > 0) { poly.points.Reverse(); }
+
+				puzzle.wakus.Add(poly);
 			}
 
 			//ピース
@@ -41,6 +45,10 @@ namespace PuzzleSolver.Core
 			{
 				Poly poly = ReadPoly(reader, true, (sbyte)i);
 				if (poly == null) { return null; }
+
+				//反時計回りの頂点列にする
+				if (poly.Area < 0) { poly.points.Reverse(); }
+
 				puzzle.pieces.Add(poly);
 			}
 
