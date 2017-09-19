@@ -34,7 +34,9 @@ namespace PuzzleSolver
         {
             DX.ChangeWindowMode(true);
             DX.SetBackgroundColor(255, 255, 255);
-            DX.SetGraphMode(1400, 1000, 32);
+            DX.SetWindowSizeChangeEnableFlag(true, false);
+            DX.SetWindowSize(800, 600);
+            DX.SetGraphMode(1920, 1080, 32);
             if (DX.Init() == DX.Result.Error) Environment.Exit(-1);
             DX.SetDrawScreen(DX.Screen.Back);
 
@@ -44,7 +46,7 @@ namespace PuzzleSolver
 
             backup = new Backup();
             read = new Read(backup);
-            controller = new Controller(backup, new Point(0, 0), 5.0, 1400, 1000);
+            controller = new Controller(backup, new Point(0, 0), 5.0, 800, 600);
 
             if (!ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Aoki\problem_rect_1.txt"))
                 return;
