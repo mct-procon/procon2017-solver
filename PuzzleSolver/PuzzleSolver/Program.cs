@@ -31,11 +31,12 @@ namespace PuzzleSolver
         [STAThread]
         static void Main(string[] args)
         {
-            DX.ChangeWindowMode(true);
-            DX.SetBackgroundColor(255, 255, 255);
-            DX.SetWindowSizeChangeEnableFlag(true, false);
-            DX.SetWindowSize(800, 600);
-            DX.SetGraphMode(1920, 1080, 32);
+            DX.ChangeWindowMode(true);                        // Set Window Mode against FullScreen Mode.
+            DX.SetBackgroundColor(255, 255, 255);             // Set Background Color of Screen.
+            DX.SetWindowSizeChangeEnableFlag(true, false);    // Set Resizable and non-Scaling.
+            DX.SetWindowSize(800, 600);                       // Set Window Size
+            DX.SetAlwaysRunFlag(true);                        // Set to run even when the window is not active.
+            DX.SetGraphMode(1920, 1080, 32);                  // Set Main Render's Size.
             if (DX.Init() == DX.Result.Error) Environment.Exit(-1);
             DX.SetDrawScreen(DX.Screen.Back);
 
