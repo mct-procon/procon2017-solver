@@ -17,7 +17,6 @@ namespace PuzzleSolver
     /// </summary>
     class Program
     {
-        static Backup backup;				//実体. パズルをStackで管理する
         static Read read;					//実体. ファイル読み込み
         static Controller	controller;		//実体. 1問解く／表示する
 
@@ -43,13 +42,12 @@ namespace PuzzleSolver
             MainWindowHWND = DX.GetMainWindowHandle();
             MainWindow = NativeWindow.FromHandle(MainWindowHWND);
 
+            read = new Read();
+            controller = new Controller(new Point(0, 0), 5.0, 1400, 1000);
 
-            backup = new Backup();
-            read = new Read(backup);
-            controller = new Controller(backup, new Point(0, 0), 5.0, 800, 600);
+            Puzzle initialPuzzle = ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\ProconSample\hint1.txt");
 
-            if (!ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Aoki\problem_rect_1.txt"))
-                return;
+            if (initialPuzzle == null) { DX.Finalize(); return; }
             DX.ClsDx();
 
             WCFServer = new Network.WCF();
@@ -64,7 +62,7 @@ namespace PuzzleSolver
                 MessageBox.Show(MainWindow, $"エラーが起きました．\n{ex}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
 #endif
             }
-            controller.Solve();
+            controller.Solve(initialPuzzle);
 
             WCFServer.Close();
 
@@ -75,11 +73,10 @@ namespace PuzzleSolver
         /// 問題ファイルを読み込みます
         /// </summary>
         /// <param name="FilePath">読み込むファイルパス</param>
-        /// <returns>読み込みに成功したか</returns>
-        static bool ReadFile(string FilePath) {
+        /// <returns>読み込んだPuzzleの参照先 (失敗時はnullを返す) </returns>
+        static Puzzle ReadFile(string FilePath) {
             try {
-                read.ReadFile(FilePath);
-                return true;
+                return read.ReadFile(FilePath);
             } catch (Exception ex) {
                 DX.WriteLineDx("File Input Error.\n{0}", ex);
                 DX.ScreenFlip();
@@ -98,7 +95,7 @@ namespace PuzzleSolver
                         break;
                 }
                 DX.Finalize();
-                return false;
+                return null;
             }
         }
     }

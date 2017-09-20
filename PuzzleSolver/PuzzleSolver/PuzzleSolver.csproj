@@ -70,11 +70,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\Backup.cs" />
     <Compile Include="Geometry\Generic.cs" />
+    <Compile Include="Geometry\SkewHeapNode.cs" />
+    <Compile Include="Geometry\SkewHeap.cs" />
     <Compile Include="Network\Networking.cs" />
     <Compile Include="UI\Controller.cs" />
-    <Compile Include="Core\EvalNote.cs" />
     <Compile Include="Geometry\Line.cs" />
     <Compile Include="Geometry\MargePoly.cs" />
     <Compile Include="Geometry\Point.cs" />

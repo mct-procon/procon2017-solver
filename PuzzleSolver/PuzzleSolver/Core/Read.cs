@@ -11,41 +11,44 @@ namespace PuzzleSolver.Core
 {
 	public class Read
 	{
-		private Backup History;      //参照. パズルの集合
-
 		//コンストラクタ
 		public Read() { }
-		public Read(Backup backup) { History = backup; }
 
-		//Historyを全消去する. その後,
-		//ファイルからパズルを読み込んで, Historyに追加する。
-		public void ReadFile(string fileName)
+		//ファイルからパズルを読み込んで返す。
+		public Puzzle ReadFile(string fileName)
 		{
-			History.Clear();
 			StreamReader reader = new StreamReader(fileName);
 			int n;
 			string s;
-			Puzzle puzzle = new Puzzle(new List<Poly>(), new List<Poly>(), new EvalNote(), new List<Line>());
+			Puzzle puzzle = new Puzzle(new List<Poly>(), new List<Poly>(), new List<Line>());
 
 			//枠
 			s = ReadLine(reader);
-			if (s == null) { return; }
+			if (s == null) { return null; }
 			n = int.Parse(s);
 			for (int i = 0; i < n; i++)
 			{
 				Poly poly = ReadPoly(reader, false);
-				if (poly == null) { return; }
-                puzzle.wakus.Add(poly);
+				if (poly == null) { return null; }
+
+				//時計回りの頂点列にする
+				if (poly.Area > 0) { poly.points.Reverse(); }
+
+				puzzle.wakus.Add(poly);
 			}
 
 			//ピース
 			s = ReadLine(reader);
-			if (s == null) { return; }
+			if (s == null) { return null; }
 			n = int.Parse(s);
 			for (int i = 0; i < n; i++)
 			{
 				Poly poly = ReadPoly(reader, true, (sbyte)i);
-				if (poly == null) { return; }
+				if (poly == null) { return null; }
+
+				//反時計回りの頂点列にする
+				if (poly.Area < 0) { poly.points.Reverse(); }
+
 				puzzle.pieces.Add(poly);
 			}
 
@@ -58,13 +61,13 @@ namespace PuzzleSolver.Core
 				}
 			}
 
-			//初期ピース数
+			//初期ピース数, 盤面評価値, 盤面ハッシュ
 			puzzle.setInitPieceNum(puzzle.pieces.Count);
-
-			//パズルを突っ込む
-			History.Push(puzzle);
-
+			puzzle.setBoardScore(0);
+			puzzle.setBoardHash();
 			reader.Close();
+
+			return puzzle;
 		}
 
 		//多角形を読み込んで返す. エラー時はnullを返す.
