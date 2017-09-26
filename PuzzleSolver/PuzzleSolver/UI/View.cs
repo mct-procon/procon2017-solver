@@ -62,16 +62,11 @@ namespace PuzzleSolver.UI
         {	
 			//線分
 			for (int i = 0; i < puzzle.wakuLines.Count; i++) { DrawLine(puzzle.wakuLines[i]); }
-			for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; for (int j = 0; j < puzzle.pieces[i].lines.Count; j++) { DrawLine(puzzle.pieces[i].lines[j]); } }
 			//頂点列
             for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; DrawPoly(puzzle.wakus[i]); }
-            for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; DrawPoly(puzzle.pieces[i]); }
+			for (int i = puzzle.nowDepth; i < puzzle.pieceTable.Count; i++) { DrawPoly(puzzle.pieceTable[i][0]); }
 			//ピース番号
 			DrawPieceIds(puzzle);
-			//辺の数の総和
-			int edgeCount = puzzle.wakuLines.Count;
-			for (int i = 0; i < puzzle.pieces.Count; i++) { edgeCount += puzzle.pieces[i].lines.Count; }
-			DX.DrawString(500, 100, 0, "合計辺数 = " + edgeCount);
         }
 
         /// <summary>
@@ -142,11 +137,11 @@ namespace PuzzleSolver.UI
 				cnt[line.initPieceId]++;
 			}
 
-			for (i = 0; i < puzzle.pieces.Count; i++)
+			for (i = puzzle.nowDepth; i < puzzle.initPieceNum; i++)
 			{
-				for (j = 0; j < puzzle.pieces[i].lines.Count; j++)
+				for (j = 0; j < puzzle.pieceTable[i][0].lines.Count; j++)
 				{
-					Line line = puzzle.pieces[i].lines[j];
+					Line line = puzzle.pieceTable[i][0].lines[j];
 					p[line.initPieceId] += line.start;
 					cnt[line.initPieceId]++;
 				}

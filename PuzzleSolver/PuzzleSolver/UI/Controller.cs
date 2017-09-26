@@ -13,7 +13,8 @@ namespace PuzzleSolver.UI
     {
 		private Puzzle initialPuzzle;	//最初のパズル
         private View view;		//実体. 描画.
-        private Solve solve;	//実体. 回答.
+        private Solve solve;    //実体. 回答.
+		private List<List<Poly>> rotatedPieceTable;	//rotatedPieceTable[i][j] = ピースiのj番目の回転候補
 
         //コンストラクタ
         public Controller() { }
@@ -31,9 +32,9 @@ namespace PuzzleSolver.UI
             ValueTuple<DX.KeyState, DX.Result> prev_key;
             ValueTuple<DX.KeyState, DX.Result> key;
 			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 1;
+			int beamWidth = 10;
 			int nowDepth = 0;
-			int maxDepth = initialPuzzle.wakus.Count + initialPuzzle.pieces.Count - 1;
+			int maxDepth = initialPuzzle.initPieceNum;
 
 			key = DX.GetHitKeyStateAll();
 			for (int i = 0; i < 100; i++) { States.Add(new SkewHeap()); }

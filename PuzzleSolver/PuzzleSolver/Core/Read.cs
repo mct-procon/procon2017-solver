@@ -20,8 +20,11 @@ namespace PuzzleSolver.Core
 			StreamReader reader = new StreamReader(fileName);
 			int n;
 			string s;
-			Puzzle puzzle = new Puzzle(new List<Poly>(), new List<Poly>(), new List<Line>());
 
+			List<Poly> wakus = new List<Poly>();
+			List<Line> wakuLines = new List<Line>();
+			List<List<Poly>> pieceTable = new List<List<Poly>>();
+			
 			//枠
 			s = ReadLine(reader);
 			if (s == null) { return null; }
@@ -29,12 +32,12 @@ namespace PuzzleSolver.Core
 			for (int i = 0; i < n; i++)
 			{
 				Poly poly = ReadPoly(reader, false);
-				if (poly == null) { return null; }
+				if (poly == null || poly.Count < 3) { return null; }
 
 				//時計回りの頂点列にする
 				if (poly.Area > 0) { poly.points.Reverse(); }
 
-				puzzle.wakus.Add(poly);
+				wakus.Add(poly);
 			}
 
 			//ピース
@@ -44,25 +47,27 @@ namespace PuzzleSolver.Core
 			for (int i = 0; i < n; i++)
 			{
 				Poly poly = ReadPoly(reader, true, (sbyte)i);
-				if (poly == null) { return null; }
+				if (poly == null || poly.Count < 3) { return null; }
 
 				//反時計回りの頂点列にする
 				if (poly.Area < 0) { poly.points.Reverse(); }
 
-				puzzle.pieces.Add(poly);
+				List<Poly> pieceList = GetPieceList(poly);
+				pieceTable.Add(pieceList);
 			}
 
 			//枠辺
-			for (int i = 0; i < puzzle.wakus.Count; i++)
+			for (int i = 0; i < wakus.Count; i++)
 			{
-				for (int j = 0; j < puzzle.wakus[i].Count; j++)
+				for (int j = 0; j < wakus[i].Count; j++)
 				{
-					puzzle.wakuLines.Add(new Line(puzzle.wakus[i].points[j], puzzle.wakus[i].points[j + 1], -1));
+					wakuLines.Add(new Line(wakus[i].points[j], wakus[i].points[j + 1], -1));
 				}
 			}
 
-			//初期ピース数, 盤面評価値, 盤面ハッシュ
-			puzzle.setInitPieceNum(puzzle.pieces.Count);
+			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, 0, pieceTable.Count);
+
+			//盤面評価値, 盤面ハッシュ
 			puzzle.setBoardScore(0);
 			puzzle.setBoardHash();
 			reader.Close();
@@ -116,6 +121,72 @@ namespace PuzzleSolver.Core
 				return s;
 			}
 			return null;
+		}
+
+		//Validな(回転, 反転)方法をすべて返す
+		private List<Poly> GetPieceList(Poly piece)
+		{
+			List<Poly> res = GetRotatedPieceList(piece);
+			List<Poly> ret = new List<Poly>(res);
+
+			for (int i = 0; i < res.Count; i++)
+			{
+				Poly poly = res[i].Clone();
+				poly.Turn(true);
+				ret.Add(poly);
+			}
+			return ret;
+		}
+
+		//Validな回転方法 (すべての点座標が整数になる原点中心の回転をしたあとのピース）をすべて返す
+		private List<Poly> GetRotatedPieceList(Poly piece)
+		{
+			List<Point> muls = GetRotateCandidate(piece.points[1] - piece.points[0]);
+			List<Poly> ret = new List<Poly>();
+			int i, j;
+
+			for (i = 0; i < muls.Count; i++)
+			{
+				Point mul = muls[i];
+				Poly poly = piece.Clone();
+				poly.Mul(mul, true);
+
+				for (j = 0; j < poly.Count; j++)
+				{
+					if (poly.points[j].Re != (int)poly.points[j].Re || poly.points[j].Im != (int)poly.points[j].Im)
+					{
+						break;
+					}
+				}
+				if (j == poly.Count)
+				{
+					ret.Add(poly);
+				}
+			}
+			return ret;
+		}
+
+		//回転の候補を返す
+		private List<Point> GetRotateCandidate(Point vec)
+		{
+			int r = (int)(vec.Abs);
+			List<Point> ret = new List<Point>();
+
+			for (int x = -r; x <= r; x++)
+			{
+				double y = Math.Sqrt(vec.Norm - x * x) + 1e-10;
+				if (y - (int)y < 1e-9)
+				{
+					Point p1 = new Point((double)x, (double)((int)y)) / vec;
+					ret.Add(p1 / p1.Abs);
+					if ((int)y > 0)
+					{
+						Point p2 = new Point((double)x, (double)((int)-y)) / vec;
+						ret.Add(p2 / p2.Abs);
+					}
+				}
+			}
+			return ret;
 		}
 	}
 }

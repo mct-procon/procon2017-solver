@@ -9,26 +9,31 @@ namespace PuzzleSolver.Core
 {
     public class Puzzle
     {
-        public List<Poly> wakus;		//実体. 枠の集合 (各枠のlinesの中身は空っぽにします)
-        public List<Poly> pieces;		//実体. ピースの集合
-		public List<Line> wakuLines;    //枠の表示辺 (探索することを考えているので, 深いコピーを使って, メモリ独立な実体を作ります.)
-		public int initPieceNum { get; private set; } //最初のピースの個数 (View, 多角形マージ時の更新で使う)
-		public int boardScore { get; private set; }   //盤面スコア.
-		public long boardHash { get; private set; }	  //盤面ハッシュ値. 頂点列に使われている線分の集合とハッシュ値を対応させている。
+        public List<Poly> wakus;									//クローンは実体. 枠の集合 (各枠のlinesの中身は空っぽにします)
+		public List<Line> wakuLines;                                //枠の表示辺 (探索することを考えているので, 深いコピーを使って, メモリ独立な実体を作ります.)
+
+		public List<List<Poly>> pieceTable { get; }					//クローンは参照. pieceTable[i][j] = ピースiのj番目の(回転, 反転フラグ)候補.
+		public int nowDepth { get; private set; }					//ピースnowDepthから結合していく.
+
+		public int initPieceNum { get; }				//最初のピースの個数 (Viewで使う)
+		public int boardScore { get; private set; }		//盤面スコア.
+		public long boardHash { get; private set; }		//盤面ハッシュ値. (枠穴の)頂点列に使われている線分の集合とハッシュ値を対応させている。
 
         //コンストラクタ
         public Puzzle() { }
-        public Puzzle(List<Poly> wakus, List<Poly> pieces, List<Line> wakuLines)
+        public Puzzle(List<Poly> wakus, List<Line> wakuLines, List<List<Poly>> pieceTable, int nowDepth, int initPieceNum)
         {
             this.wakus = wakus;
-            this.pieces = pieces;
 			this.wakuLines = wakuLines;
+			this.pieceTable = pieceTable;
+			this.nowDepth = nowDepth;
+			this.initPieceNum = initPieceNum;
         }
 
-		//ピース数. Readクラスでのみ使用.
-		public void setInitPieceNum(int num)
+		//nowDepthの更新. Solverクラスの多角形マージでのみ使用
+		public void setNowDepth(int depth)
 		{
-			initPieceNum = num;
+			nowDepth = depth;
 		}
 
 		//boardScoreの更新. Solverクラスの多角形マージでのみ使用
@@ -47,11 +52,9 @@ namespace PuzzleSolver.Core
         //evalNoteはまだ使っていないので, コピーしていません）
         public Puzzle Clone()
         {
-			Puzzle ret = new Puzzle(new List<Poly>(this.wakus), new List<Poly>(this.pieces), new List<Line>(this.wakuLines));
+			Puzzle ret = new Puzzle(new List<Poly>(this.wakus), new List<Line>(this.wakuLines), this.pieceTable, this.nowDepth, this.initPieceNum);
 			for (int i = 0; i < ret.wakus.Count; i++) { ret.wakus[i] = ret.wakus[i].Clone(); }
-			for (int i = 0; i < ret.pieces.Count; i++) { ret.pieces[i] = ret.pieces[i].Clone(); }
 			for (int i = 0; i < ret.wakuLines.Count; i++) { ret.wakuLines[i] = ret.wakuLines[i].Clone(); }
-			ret.initPieceNum = this.initPieceNum;
 			ret.boardScore = this.boardScore;
 			ret.boardHash = this.boardHash;
             return ret;
@@ -71,7 +74,6 @@ namespace PuzzleSolver.Core
 			List<Line> lines = new List<Line>();
 			
 			for (i = 0; i < wakus.Count; i++) { if (!wakus[i].isExist) continue; for (j = 0; j < wakus[i].Count; j++) { lines.Add(new Line(wakus[i].points[j], wakus[i].points[j + 1])); } }
-			for (i = 0; i < pieces.Count; i++) { if (!pieces[i].isExist) continue; for (j = 0; j < pieces[i].Count; j++) { lines.Add(new Line(pieces[i].points[j], pieces[i].points[j + 1])); } }
 			lines.Sort((a, b) => Point.Compare(a.start, b.start) != 0 ? Point.Compare(a.start, b.start) : Point.Compare(a.end, b.end));
 
 			long mul1 = 1, sum1 = 0;

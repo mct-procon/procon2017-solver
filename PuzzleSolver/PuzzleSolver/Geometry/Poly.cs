@@ -20,6 +20,9 @@ namespace PuzzleSolver.Geometry
         public bool isPiece;
         public bool isExist;
 
+		//X座標最小の点（複数あればそれらのうちY座標最小の点）の点番号 (常に正しい値が入るように更新される）
+		public int minestPointId { get; private set; }
+
         //コンストラクタ
         public Poly() { }
         public Poly(List<Point> points, List<Line> lines, bool isPiece)
@@ -28,6 +31,7 @@ namespace PuzzleSolver.Geometry
             this.lines   = lines;
             this.isPiece = isPiece;
             this.isExist = true;
+			this.minestPointId = GetMinestPointId();
         }
 
         //多角形の頂点数
@@ -121,14 +125,16 @@ namespace PuzzleSolver.Geometry
             while (l < r) { Point t = points[l]; points[l] = points[r]; points[r] = t; l++; r--; }
 
             if (isUpdateLines) { for (int i = 0; i < lines.Count; i++) { lines[i].Turn(); } }
-        }
+			this.minestPointId = GetMinestPointId();
+		}
 
         //乗算 (回転)
         public void Mul (Point mulValue, bool isUpdateLines)
         {
             for (int i = 0; i < points.Count; i++) { points[i] = points[i] * mulValue; }
             if (isUpdateLines) { for (int i = 0; i < lines.Count; i++) { lines[i].Mul(mulValue); } }
-        }
+			this.minestPointId = GetMinestPointId();
+		}
 
         //インデクサ
         //(可毒性と速さが微粒子レベルで下がるので, 負の添え字[-1]にアクセスしたい！というとき以外はあまり使わないでください。）
@@ -224,11 +230,28 @@ namespace PuzzleSolver.Geometry
 
             //角の個数は, count[0] + count[1] - 1で導出できる
             count[3] = count[0] + count[1] - 1;
+			if (count[3] < 0) { count[3] = 0; }
 
             int score = 0;
             for (int i = 0; i < 4; i++) { score += weight[i] * count[i]; }
             return score;
         }
+
+		//X座標最小=>(複数あればそのうちY座標最小)の点の番号を返す. 頂点数が0以下だったら, -1を返す.
+		public int GetMinestPointId()
+		{
+			if (Count <= 0) { return -1; }
+
+			int id = 0;
+			for (int i = 1; i < Count; i++)
+			{
+				if (Point.Compare(points[id], points[i]) > 0)
+				{
+					id = i;
+				}
+			}
+			return id;
+		}
 
 		//インデックス変換. 結合度計算で内部的に使う
 		private static int toIndex(int i, int Count)
@@ -240,12 +263,9 @@ namespace PuzzleSolver.Geometry
         //クローン (深いコピー)
         public Poly Clone()
         {
-            Poly ret = new Poly();
-            ret.lines = new List<Line>(this.lines);
-            ret.points = new List<Point>(this.points);
+			Poly ret = new Poly(new List<Point>(this.points), new List<Line>(this.lines), this.isPiece);
             for (int i = 0; i < ret.lines.Count; i++) { ret.lines[i] = ret.lines[i].Clone(); }
-            ret.isPiece = this.isPiece;
-            ret.isExist = this.isExist;
+			ret.isExist = isExist;
             return ret;
         }
     }

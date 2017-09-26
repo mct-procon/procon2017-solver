@@ -20,40 +20,40 @@ namespace PuzzleSolver.Core
 		//ビームサーチの次状態更新
 		public void SetNextStates(Puzzle puzzle, int beamWidth, SkewHeap heap, HashSet<long> puzzlesInHeap)
 		{
-			List<Poly> polys = new List<Poly>(puzzle.wakus);
-			for (int i = 0; i < puzzle.pieces.Count; i++) { polys.Add(puzzle.pieces[i]); }
+			if (puzzle.nowDepth >= puzzle.initPieceNum) { return; }
+			int wakuId = GetDistinationWakuId(puzzle.wakus);
+			if (wakuId < 0) { return; }
 
-			for (int dstPolyId = 0; dstPolyId < polys.Count; dstPolyId++)
+			Poly dstPoly = puzzle.wakus[wakuId];
+			List<Poly> srcPolys = puzzle.pieceTable[puzzle.nowDepth];
+			for (int i = 0; i < srcPolys.Count; i++)
 			{
-				Poly dstPoly = polys[dstPolyId];
-				if (!dstPoly.isExist) { continue; }
-				for (int srcPolyId = 0; srcPolyId < puzzle.pieces.Count; srcPolyId++)
+				int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);
+				if (score < 0) { continue; }
+				Puzzle nextPuzzle = GetNextPuzzle(puzzle, wakuId, i, score);
+				if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
 				{
-					Poly srcPoly = puzzle.pieces[srcPolyId];
-					if (!srcPoly.isExist) { continue; }
-					if (dstPoly == srcPoly) { continue; }
-
-					for (int dstPointId = 0; dstPointId < dstPoly.Count; dstPointId++)
-					{
-						for (int srcPointId = 0; srcPointId < srcPoly.Count; srcPointId++)
-						{
-							for (int option = 0; option < 4; option++)
-							{
-								int direction = option / 2;
-								bool turnflag = (option % 2 == 1);
-								int score = getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag, heap.Count == beamWidth ? heap.MinValue().boardScore + 1 - puzzle.boardScore : -1);
-								if (score < 0) { continue; }
-
-								Puzzle nextPuzzle = GetNextPuzzle(puzzle, dstPolyId, srcPolyId, dstPointId, srcPointId, direction, turnflag, score);
-								if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
-								{
-									UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
-								}
-							}
-						}
-					}
+					UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
 				}
 			}
+		}
+
+		//dstination頂点の属する枠の番号を返す. dstination頂点 = 枠Xの頂点番号Yのとき, Xを返す.
+		//枠の頂点がない場合は, -1を返す。
+		public int GetDistinationWakuId(List<Poly> wakus)
+		{
+			int X = -1;
+
+			for (int i = 0; i < wakus.Count; i++)
+			{
+				if (!wakus[i].isExist || wakus[i].Count <= 0) { continue; }
+				if (X == -1 || Point.Compare(wakus[X].points[wakus[X].minestPointId], wakus[i].points[wakus[i].minestPointId]) > 0)
+				{
+					X = i;
+				}
+			}
+
+			return X;
 		}
 
 		//ビームを更新するか
@@ -80,47 +80,34 @@ namespace PuzzleSolver.Core
 		}
 
 		//結合度を得る
-		private int getScore(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId, int direction, bool turnflag, int bestScore)
+		private int GetScore(Poly dstPoly, Poly srcPoly, int bestScore)
 		{
 			List<Point> backupPointList = new List<Point>(srcPoly.points);
-			if (turnflag) { srcPoly.Turn(false); }
-			move(dstPoly, srcPoly, dstPointId, srcPointId, direction);
-			int score = Poly.Evaluation(dstPoly, srcPoly, dstPointId, srcPointId);
-			if (score < bestScore || dstPoly.isHitLine(srcPoly)) { score = -1; }
+			move(dstPoly, srcPoly, false);
+			int score = Poly.Evaluation(dstPoly, srcPoly, dstPoly.minestPointId, srcPoly.minestPointId);
+			if (score < bestScore || srcPoly.isHitLine(dstPoly)) { score = -1; }
 			srcPoly.points = backupPointList;
 			return score;
 		}
 
-		//多角形srcPolyを平行移動・回転する。
-		//まず, 「多角形dstPolyの頂点dstPointId --> dstPointId + direction」と「多角形srcPolyの頂点srcPointId --> srcPointId - direction」
-		//が同じ方向を向くように回転する。
-		//次に, 「多角形dstPolyの頂点dstPointId」と「多角形srcPolyの頂点srcPointId」がくっつくように平行移動する。
-		private void move(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId, int direction, bool isUpdateLines = false)
+		//多角形srcPolyを(平行)移動する。多角形dstPolyのx座標最小点と, 多角形srcPolyのx座標最小点が一致するように移動量を決める。
+		private void move(Poly dstPoly, Poly srcPoly, bool isUpdateLines)
 		{
-			Point mul = (dstPoly[dstPointId + direction] - dstPoly[dstPointId]) / (srcPoly[srcPointId - direction] - srcPoly[srcPointId]);
-			mul /= mul.Abs;
-			srcPoly.Mul(mul, isUpdateLines);
-
-			Point t = dstPoly.points[dstPointId] - srcPoly.points[srcPointId];
-			srcPoly.Trans(t, isUpdateLines);
+			srcPoly.Trans(dstPoly[dstPoly.minestPointId] - srcPoly[srcPoly.minestPointId], isUpdateLines);
 		}
 
-
 		//結合後のパズルを得る。(マージ不可な場合は, nullを返す.) (使用時の前提：当たり判定は完了している)
-		//引数：結合前のPuzzle(const), くっつけ方, 結合度.
-		//dstPolyId … {枠0, 枠1, …, ピース0, ピース1, …}(0頂点の多角形含む)としたときに, 何番目の多角形にくっつけるか？ (0-indexed)
-		private Puzzle GetNextPuzzle(Puzzle puzzle, int dstPolyId, int srcPolyId, int dstPointId, int srcPointId, int direction, bool turnflag, int score)
+		//引数：結合前のPuzzle(const), くっつけ方(枠番号, ピースnowDepthの候補番号), 結合度.
+		private Puzzle GetNextPuzzle(Puzzle puzzle, int wakuId, int pieceListId, int score)
 		{
 			Puzzle ret = puzzle.Clone();
 			Poly dstPoly, srcPoly;
 
-			if (dstPolyId < ret.wakus.Count) { dstPoly = ret.wakus[dstPolyId]; }
-			else { dstPoly = ret.pieces[dstPolyId - ret.wakus.Count]; }
-			srcPoly = ret.pieces[srcPolyId];
+			dstPoly = ret.wakus[wakuId];
+			srcPoly = ret.pieceTable[ret.nowDepth][pieceListId].Clone();
 
 			//ピースの移動
-			if (turnflag) { srcPoly.Turn(true); }
-			move(dstPoly, srcPoly, dstPointId, srcPointId, direction, true);
+			move(dstPoly, srcPoly, true);
 
 			//マージ判定
 			List<Poly> polys = margePoly.Marge(dstPoly, srcPoly);
@@ -129,11 +116,7 @@ namespace PuzzleSolver.Core
 			//マージ処理
 			for (int i = 0; i < polys.Count; i++)
 			{
-				if (polys[i].isPiece)
-				{
-					ret.pieces.Add(polys[i]);
-				}
-				else
+				if (!polys[i].isPiece)
 				{
 					ret.wakus.Add(polys[i]);
 				}
@@ -148,9 +131,10 @@ namespace PuzzleSolver.Core
 			}
 
 			dstPoly.isExist = false; dstPoly.points.Clear(); dstPoly.lines.Clear();
-			srcPoly.isExist = false; srcPoly.points.Clear(); srcPoly.lines.Clear();
+			//srcPoly.isExist = false; srcPoly.points.Clear(); srcPoly.lines.Clear();
 
-			//盤面評価, ハッシュの登録
+			//盤面の深さ, 盤面評価, ハッシュの登録
+			ret.setNowDepth(puzzle.nowDepth + 1);
 			ret.setBoardScore(puzzle.boardScore + score);
 			ret.setBoardHash();
 
