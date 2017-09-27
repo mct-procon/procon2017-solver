@@ -32,7 +32,7 @@ namespace PuzzleSolver.UI
             ValueTuple<DX.KeyState, DX.Result> prev_key;
             ValueTuple<DX.KeyState, DX.Result> key;
 			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 10;
+			int beamWidth = 100;
 			int nowDepth = 0;
 			int maxDepth = initialPuzzle.initPieceNum;
 

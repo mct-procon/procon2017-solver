@@ -144,6 +144,7 @@ namespace PuzzleSolver.Core
 			List<Point> muls = GetRotateCandidate(piece.points[1] - piece.points[0]);
 			List<Poly> ret = new List<Poly>();
 			int i, j;
+			double AllowError = 1e-8;
 
 			for (i = 0; i < muls.Count; i++)
 			{
@@ -153,10 +154,13 @@ namespace PuzzleSolver.Core
 
 				for (j = 0; j < poly.Count; j++)
 				{
-					if (poly.points[j].Re != (int)poly.points[j].Re || poly.points[j].Im != (int)poly.points[j].Im)
+					int Re = GetMinErrorInteger(poly[j].Re);
+					int Im = GetMinErrorInteger(poly[j].Im);
+					if (Math.Abs(poly[j].Re - Re) > AllowError || Math.Abs(poly[j].Im - Im) > AllowError)
 					{
 						break;
 					}
+					poly.points[j] = new Point((double)Re, (double)Im);
 				}
 				if (j == poly.Count)
 				{
@@ -184,6 +188,20 @@ namespace PuzzleSolver.Core
 						Point p2 = new Point((double)x, (double)((int)-y)) / vec;
 						ret.Add(p2 / p2.Abs);
 					}
+				}
+			}
+			return ret;
+		}
+
+		//|X - ret|が最小になるretを返す. 複数retが考えられる場合は小さい方を返す.
+		private int GetMinErrorInteger(double X)
+		{
+			int ret = (int)X - 1;
+			for (int i = 0; i <= 1; i++)
+			{
+				if (Math.Abs(X - ret) > Math.Abs(X - ((int)X + i)))
+				{
+					ret = (int)X + i;
 				}
 			}
 			return ret;

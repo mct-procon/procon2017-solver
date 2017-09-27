@@ -85,7 +85,7 @@ namespace PuzzleSolver.Core
 			List<Point> backupPointList = new List<Point>(srcPoly.points);
 			move(dstPoly, srcPoly, false);
 			int score = Poly.Evaluation(dstPoly, srcPoly, dstPoly.minestPointId, srcPoly.minestPointId);
-			if (score < bestScore || srcPoly.isHitLine(dstPoly)) { score = -1; }
+			if (score < bestScore || srcPoly.isHitLine(dstPoly) || !dstPoly.isCover(srcPoly.SizingPoly()[0])) { score = -1; }
 			srcPoly.points = backupPointList;
 			return score;
 		}
