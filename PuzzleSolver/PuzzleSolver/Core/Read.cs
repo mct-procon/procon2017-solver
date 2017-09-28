@@ -178,14 +178,15 @@ namespace PuzzleSolver.Core
 
 			for (int x = -r; x <= r; x++)
 			{
-				double y = Math.Sqrt(vec.Norm - x * x) + 1e-10;
-				if (y - (int)y < 1e-9)
+				double y = Math.Sqrt(vec.Norm - x * x);
+				int yi = GetMinErrorInteger(y);
+				if (Math.Abs(y - yi) < 1e-8)
 				{
-					Point p1 = new Point((double)x, (double)((int)y)) / vec;
+					Point p1 = new Point((double)x, (double)yi) / vec;
 					ret.Add(p1 / p1.Abs);
-					if ((int)y > 0)
+					if (Math.Abs(yi) > 0)
 					{
-						Point p2 = new Point((double)x, (double)((int)-y)) / vec;
+						Point p2 = new Point((double)x, (double)-yi) / vec;
 						ret.Add(p2 / p2.Abs);
 					}
 				}

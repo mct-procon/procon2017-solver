@@ -67,8 +67,7 @@ namespace PuzzleSolver.Geometry
 				double area = 0;
 				for (int i = 0; i < 2; i++)
 				{
-					if (ret[i].Area > 0) { ret[i].points.Reverse(); }
-					area += ret[i].Area * (-1);
+					area += Math.Abs(ret[i].Area);
 				}
 				if (area > -dstPoly.Area)
 				{
@@ -242,7 +241,7 @@ namespace PuzzleSolver.Geometry
 		}
 
 		//1頂点で接している2つの枠穴を, 1つの枠穴にする。（接している頂点を起点として、頂点列をマージ）.
-		//使用時の前提：2つの枠穴の頂点列の向きは時計回りになっている。
+		//使用時の前提：2つの枠穴の頂点列の向きは異なる向きになっている。
 		List<Poly> MargeTwoWaku(List<Poly> wakus)
 		{
 			Dictionary<Point, int> Counts = new Dictionary<Point, int>();
@@ -291,6 +290,12 @@ namespace PuzzleSolver.Geometry
 			points.Add(points[0]);
 
 			Poly poly = new Poly(points, new List<Line>(), false);
+
+			if (poly.Area > 0)
+			{
+				poly.points.Reverse();
+			}
+
 			List<Poly> ret = new List<Poly>();
 			ret.Add(poly);
 			return ret;
