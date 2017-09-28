@@ -60,6 +60,22 @@ namespace PuzzleSolver.Geometry
 			{
 				ret.Add(fixPoly(polys[i].points, lines, polys[i].isPiece));
 			}
+
+			//枠とピースが頂点で接していて, 枠が単純多角形ではなくなるケースの処理
+			if (!dstPoly.isPiece && ret.Count == 2)
+			{
+				double area = 0;
+				for (int i = 0; i < 2; i++)
+				{
+					if (ret[i].Area > 0) { ret[i].points.Reverse(); }
+					area += ret[i].Area * (-1);
+				}
+				if (area > -dstPoly.Area)
+				{
+					//頂点列の結合をして, 1つの枠穴として返す. 結合の始点
+					ret = MargeTwoWaku(ret);
+				}
+			}
 			return ret;
 		}
 
@@ -223,6 +239,61 @@ namespace PuzzleSolver.Geometry
 			ret.Add(ret[0]);
 
 			return new Poly(ret, lines, isPiece);
+		}
+
+		//1頂点で接している2つの枠穴を, 1つの枠穴にする。（接している頂点を起点として、頂点列をマージ）.
+		//使用時の前提：2つの枠穴の頂点列の向きは時計回りになっている。
+		List<Poly> MargeTwoWaku(List<Poly> wakus)
+		{
+			Dictionary<Point, int> Counts = new Dictionary<Point, int>();
+			int i, j, k;
+
+			for (i = 0; i < wakus.Count; i++)
+			{
+				for (j = 0; j < wakus[i].Count; j++)
+				{
+					if (!Counts.ContainsKey(wakus[i][j]))
+					{
+						Counts[wakus[i][j]] = 0;
+					}
+					Counts[wakus[i][j]]++;
+				}
+			}
+
+			if (!Counts.ContainsValue(2)) { throw new Exception("共通の頂点が見つかりません。"); }
+
+			Point p = new Point(0, 0);
+			foreach (KeyValuePair<Point, int> item in Counts)
+			{
+				if (item.Value == 2)
+				{
+					p = item.Key;
+					break;
+				}
+			}
+
+			List<Point> points = new List<Point>();
+			for (i = 0; i < wakus.Count; i++)
+			{
+				for (j = 0; j < wakus[i].Count; j++)
+				{
+					if (Point.Compare(wakus[i][j], p) == 0)
+					{
+						break;
+					}
+				}
+
+				for (k = 0; k < wakus[i].Count; k++)
+				{
+					points.Add(wakus[i][k + j]);
+				}
+			}
+			points.Add(points[0]);
+
+			Poly poly = new Poly(points, new List<Line>(), false);
+			List<Poly> ret = new List<Poly>();
+			ret.Add(poly);
+			return ret;
 		}
 	}
 }
