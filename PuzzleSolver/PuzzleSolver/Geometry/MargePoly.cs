@@ -163,19 +163,15 @@ namespace PuzzleSolver.Geometry
 			cycle.Add(startPointId);
 
 			int pos = edgeTo[startPointId][startEdgeId];
-			int prevPos = -1;
+			int prevPos = startPointId;
 			used[startPointId][startEdgeId] = true;
 
 			while (pos != startPointId)
 			{
 				cycle.Add(pos);
-				int edgeId = getNextEdgeId(prevPos, pos);
-				int i;
-				for (i = 0; i < edgeTo[pos].Count; i++)
-				{
-					if (!used[pos][i]) { break; }
-				}
-				if (i == edgeTo[pos].Count)
+				int edgeId = getNextEdgeId(prevPos, pos, isPiece);
+
+				if (edgeId < 0)
 				{
 					System.IO.StreamWriter writer = new System.IO.StreamWriter("margeErrorLog.txt");
 					writer.WriteLine(debugDstPoly.Count.ToString());
@@ -190,9 +186,9 @@ namespace PuzzleSolver.Geometry
 					throw new Exception("多角形マージ処理：サイクルを検出できませんでした。");
 				}
 
-				used[pos][i] = true;
+				used[pos][edgeId] = true;
 				prevPos = pos;
-				pos = edgeTo[pos][i];
+				pos = edgeTo[pos][edgeId];
 			}
 			cycle.Add(startPointId);
 			return cycle;
@@ -245,21 +241,31 @@ namespace PuzzleSolver.Geometry
 
 		//サイクルの検出で用いる。次に頂点posから、何番の辺を使って次の頂点に移動するかを探す。
 		//なければ-1を返す.
-		int getNextEdgeId(int prevPos, int pos)
+		int getNextEdgeId(int prevPos, int pos, bool isPiece)
 		{
+			const double PAI = 3.14159265358979;
 			int i;
+
+			double minArg = 114514;
+			int ret = -1;
 			Point a = pointList[prevPos] - pointList[pos];
+			a /= a.Abs;
 
 			for (i = 0; i < edgeTo[pos].Count; i++)
 			{
-				if (!used[pos][i]) { continue; }
+				if (used[pos][i]) { continue; }
+				if (isPiece) { return i; }
 				int nextPos = edgeTo[pos][i];
 
 				Point b = pointList[nextPos] - pointList[pos];
+				b /= b.Abs;
 
+				double arg = (b / a).Arg;
+				if (arg < 0) { arg += 2 * PAI; }
+				if (minArg > arg) { minArg = arg; ret = i; }
 			}
 
-			return -1;
+			return ret;
 		}
 
 		//1頂点で接している2つの枠穴を, 1つの枠穴にする。（接している頂点を起点として、頂点列をマージ）.

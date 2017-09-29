@@ -21,28 +21,33 @@ namespace PuzzleSolver.Core
 		public void SetNextStates(Puzzle puzzle, int beamWidth, SkewHeap heap, HashSet<long> puzzlesInHeap)
 		{
 			if (puzzle.nowDepth >= puzzle.initPieceNum) { return; }
-			int wakuId = GetDistinationWakuId(puzzle.wakus);
-			if (wakuId < 0) { return; }
+			List<int> wakuIds = GetDistinationWakuId(puzzle.wakus);
+			if (wakuIds == null) { return; }
 
-			Poly dstPoly = puzzle.wakus[wakuId];
 			List<Poly> srcPolys = puzzle.pieceTable[puzzle.nowDepth];
-			for (int i = 0; i < srcPolys.Count; i++)
+
+			foreach (int wakuId in wakuIds)
 			{
-				int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);
-				if (score < 0) { continue; }
-				Puzzle nextPuzzle = GetNextPuzzle(puzzle, wakuId, i, score);
-				if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
+				Poly dstPoly = puzzle.wakus[wakuId];
+				for (int i = 0; i < srcPolys.Count; i++)
 				{
-					UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
+					int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);
+					if (score < 0) { continue; }
+					Puzzle nextPuzzle = GetNextPuzzle(puzzle, wakuId, i, score);
+					if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
+					{
+						UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
+					}
 				}
 			}
 		}
 
-		//dstination頂点の属する枠の番号を返す. dstination頂点 = 枠Xの頂点番号Yのとき, Xを返す.
-		//枠の頂点がない場合は, -1を返す。
-		public int GetDistinationWakuId(List<Poly> wakus)
+		//dstination頂点の属する可能性のある枠の番号を返す. dstination頂点 = 枠Xの頂点番号Yのとき, {X}を返す.
+		//枠の頂点がない場合は, nullを返す。
+		public List<int> GetDistinationWakuId(List<Poly> wakus)
 		{
 			int X = -1;
+			List<int> ret = new List<int>();
 
 			for (int i = 0; i < wakus.Count; i++)
 			{
@@ -52,8 +57,17 @@ namespace PuzzleSolver.Core
 					X = i;
 				}
 			}
+			if (X == -1) { return null; }
 
-			return X;
+			for (int i = 0; i < wakus.Count; i++)
+			{
+				if (!wakus[i].isExist || wakus[i].Count <= 0) { continue; }
+				if (Point.Compare(wakus[X].points[wakus[X].minestPointId], wakus[i].points[wakus[i].minestPointId]) == 0)
+				{
+					ret.Add(i);
+				}
+			}
+			return ret;
 		}
 
 		//ビームを更新するか
@@ -85,7 +99,18 @@ namespace PuzzleSolver.Core
 			List<Point> backupPointList = new List<Point>(srcPoly.points);
 			move(dstPoly, srcPoly, false);
 			int score = Poly.Evaluation(dstPoly, srcPoly, dstPoly.minestPointId, srcPoly.minestPointId);
-			if (score < bestScore || srcPoly.isHitLine(dstPoly) || !dstPoly.isCover(srcPoly.SizingPoly()[0])) { score = -1; }
+			if (score < bestScore || srcPoly.isHitLine(dstPoly)) { score = -1; }
+
+			List<Point> points = srcPoly.SizingPoly();
+			for (int i = 0; i < points.Count; i++)
+			{
+				if (!dstPoly.isCover(points[i]))
+				{
+					score = -1;
+					break;
+				}
+			}
+
 			srcPoly.points = backupPointList;
 			return score;
 		}

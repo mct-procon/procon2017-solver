@@ -49,10 +49,13 @@ namespace PuzzleSolver.Geometry
         /// </summary>
         public Point Conj => new Point(Re, -Im);
 
-        /// <summary>
-        /// ベクトルの内積
-        /// </summary>
-        public static double Dot (Point a, Point b) => a.Re * b.Re + a.Im * b.Im;
+		//偏角
+		public double Arg => Math.Atan2(Im, Re);
+
+		/// <summary>
+		/// ベクトルの内積
+		/// </summary>
+		public static double Dot (Point a, Point b) => a.Re * b.Re + a.Im * b.Im;
         /// <summary>
         /// ベクトルの外積
         /// </summary>
