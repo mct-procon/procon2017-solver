@@ -11,9 +11,11 @@ namespace PuzzleSolver.Core
 {
 	public class Read
 	{
+		StreamWriter ReadLog = new StreamWriter("ReadLog.txt");
+
 		//コンストラクタ
 		public Read() { }
-
+		
 		//ファイルからパズルを読み込んで返す。
 		public Puzzle ReadFile(string fileName)
 		{
@@ -71,6 +73,7 @@ namespace PuzzleSolver.Core
 			puzzle.setBoardScore(0);
 			puzzle.setBoardHash();
 			reader.Close();
+			ReadLog.Close();
 
 			return puzzle;
 		}
@@ -141,6 +144,11 @@ namespace PuzzleSolver.Core
 		//Validな回転方法 (すべての点座標が整数になる原点中心の回転をしたあとのピース）をすべて返す
 		private List<Poly> GetRotatedPieceList(Poly piece)
 		{
+			for (int k = 0; k < piece.Count; k++)
+			{
+				Point p = piece.points[k + 1] - piece.points[k];
+			}
+
 			List<Point> muls = GetRotateCandidate(piece.points[1] - piece.points[0]);
 			List<Poly> ret = new List<Poly>();
 			int i, j;
@@ -150,9 +158,15 @@ namespace PuzzleSolver.Core
 			{
 				Point mul = muls[i];
 				Poly poly = piece.Clone();
-				poly.Mul(mul, true);
 
-				for (j = 0; j < poly.Count; j++)
+				//piece.points[0]を中心に回転する！！！！（重要なので(ry)
+				//rotation center must be [piece.points[0]], not (0, 0). (that is important)
+				Point p = poly.points[0];
+				poly.Trans(p * (-1), true);
+				poly.Mul(mul, true);
+				poly.Trans(p, true);
+
+				for (j = 0; j < poly.points.Count; j++)
 				{
 					int Re = GetMinErrorInteger(poly[j].Re);
 					int Im = GetMinErrorInteger(poly[j].Im);
@@ -162,7 +176,7 @@ namespace PuzzleSolver.Core
 					}
 					poly.points[j] = new Point((double)Re, (double)Im);
 				}
-				if (j == poly.Count)
+				if (j == poly.points.Count)
 				{
 					ret.Add(poly);
 				}
@@ -180,14 +194,14 @@ namespace PuzzleSolver.Core
 			{
 				double y = Math.Sqrt(vec.Norm - x * x);
 				int yi = GetMinErrorInteger(y);
-				if (Math.Abs(y - yi) < 1e-8)
+				if (Math.Abs(y - yi) < 1e-9)
 				{
 					Point p1 = new Point((double)x, (double)yi) / vec;
-					ret.Add(p1 / p1.Abs);
+					ret.Add(p1);
 					if (Math.Abs(yi) > 0)
 					{
 						Point p2 = new Point((double)x, (double)-yi) / vec;
-						ret.Add(p2 / p2.Abs);
+						ret.Add(p2);
 					}
 				}
 			}

@@ -17,7 +17,7 @@ namespace PuzzleSolver.Core
 
 		public int initPieceNum { get; }				//最初のピースの個数 (Viewで使う)
 		public int boardScore { get; private set; }		//盤面スコア.
-		public long boardHash { get; private set; }		//盤面ハッシュ値. (枠穴の)頂点列に使われている線分の集合とハッシュ値を対応させている。
+		public long boardHash { get; private set; }     //盤面ハッシュ値. (枠穴の)頂点列に使われている線分の集合とハッシュ値を対応させている。
 
         //コンストラクタ
         public Puzzle() { }

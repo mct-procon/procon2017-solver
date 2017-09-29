@@ -23,7 +23,7 @@ namespace PuzzleSolver.Geometry
 		//X座標最小の点（複数あればそれらのうちY座標最小の点）の点番号 (常に正しい値が入るように更新される）
 		public int minestPointId { get; private set; }
 
-        //コンストラクタ
+		//コンストラクタ
         public Poly() { }
         public Poly(List<Point> points, List<Line> lines, bool isPiece)
         {

@@ -14,7 +14,6 @@ namespace PuzzleSolver.UI
 		private Puzzle initialPuzzle;	//最初のパズル
         private View view;		//実体. 描画.
         private Solve solve;    //実体. 回答.
-		private List<List<Poly>> rotatedPieceTable;	//rotatedPieceTable[i][j] = ピースiのj番目の回転候補
 
         //コンストラクタ
         public Controller() { }
