@@ -14,7 +14,43 @@ namespace PuzzleSolver.Core
 		//コンストラクタ
 		public Read() { }
 
-		//ファイルからパズルを読み込んで返す。
+
+		//QRコードから読み取ったデータをPuzzle型に変換する.
+		public Puzzle ReadFromQRCode(Procon2017MCTProtocol.QRCodeData QRCode)
+		{
+			Puzzle puzzle = new Puzzle(new List<Poly>(), new List<Poly>(), new List<Line>());
+			int i, j;
+
+			//枠
+			for (i = 0; i < QRCode.Frames.Count; i++)
+			{
+				puzzle.wakus.Add(ParsePolyFromQRCode(QRCode.Frames[i], false, -1));
+			}
+
+			//ピース
+			for (i = 0; i < QRCode.Polygons.Count; i++)
+			{
+				puzzle.pieces.Add(ParsePolyFromQRCode(QRCode.Polygons[i], true, (sbyte)i));
+			}
+
+			//枠辺
+			for (i = 0; i < puzzle.wakus.Count; i++)
+			{
+				for (j = 0; j < puzzle.wakus[i].Count; j++)
+				{
+					puzzle.wakuLines.Add(new Line(puzzle.wakus[i].points[j], puzzle.wakus[i].points[j + 1], -1));
+				}
+			}
+
+			//初期ピース数, 盤面評価値, 盤面ハッシュ
+			puzzle.setInitPieceNum(puzzle.pieces.Count);
+			puzzle.setBoardScore(0);
+			puzzle.setBoardHash();
+			return puzzle;
+		}
+
+		/// <param name="fileName">fairu</param>
+		/// <returns></returns>
 		public Puzzle ReadFile(string fileName)
 		{
 			StreamReader reader = new StreamReader(fileName);
@@ -68,6 +104,30 @@ namespace PuzzleSolver.Core
 			reader.Close();
 
 			return puzzle;
+		}
+
+		private Poly ParsePolyFromQRCode(Procon2017MCTProtocol.SendablePolygon polygon, bool isPiece, sbyte initPieceId = -1)
+		{
+			int i;
+			List<Point> points = new List<Point>();
+			List<Line> lines = new List<Line>();
+
+			for (i = 0; i < polygon.Points.Count; i++)
+			{
+				points.Add(new Point(polygon.Points[i].X, polygon.Points[i].Y));
+			}
+			points.Add(points[0]);
+
+			//表示する線分の設定 (ピースのみ)
+			if (isPiece)
+			{
+				for (i = 0; i < points.Count - 1; i++)
+				{
+					lines.Add(new Line(points[i], points[i + 1], initPieceId));
+				}
+			}
+
+			return new Poly(points, lines, isPiece);
 		}
 
 		//多角形を読み込んで返す. エラー時はnullを返す.

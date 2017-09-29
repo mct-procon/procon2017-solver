@@ -77,6 +77,7 @@ namespace PuzzleSolver
         /// <returns>読み込んだPuzzleの参照先 (失敗時はnullを返す) </returns>
         static Puzzle ReadFile(string FilePath) {
             try {
+				read.ReadFile(FilePath);
                 return read.ReadFile(FilePath);
             } catch (Exception ex) {
                 DX.WriteLineDx("File Input Error.\n{0}", ex);
