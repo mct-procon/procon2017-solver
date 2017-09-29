@@ -24,13 +24,13 @@ namespace PuzzleSolver.Core
 			//枠
 			for (i = 0; i < QRCode.Frames.Count; i++)
 			{
-				puzzle.wakus.Add(ParsePolyFromQRCode(QRCode.Frames[i], false, -1));
+				puzzle.wakus.Add(Poly.ParsePolyFromQRCode(QRCode.Frames[i], false, -1));
 			}
 
 			//ピース
 			for (i = 0; i < QRCode.Polygons.Count; i++)
 			{
-				puzzle.pieces.Add(ParsePolyFromQRCode(QRCode.Polygons[i], true, (sbyte)i));
+				puzzle.pieces.Add(Poly.ParsePolyFromQRCode(QRCode.Polygons[i], true, (sbyte)i));
 			}
 
 			//枠辺
@@ -104,30 +104,6 @@ namespace PuzzleSolver.Core
 			reader.Close();
 
 			return puzzle;
-		}
-
-		private Poly ParsePolyFromQRCode(Procon2017MCTProtocol.SendablePolygon polygon, bool isPiece, sbyte initPieceId = -1)
-		{
-			int i;
-			List<Point> points = new List<Point>();
-			List<Line> lines = new List<Line>();
-
-			for (i = 0; i < polygon.Points.Count; i++)
-			{
-				points.Add(new Point(polygon.Points[i].X, polygon.Points[i].Y));
-			}
-			points.Add(points[0]);
-
-			//表示する線分の設定 (ピースのみ)
-			if (isPiece)
-			{
-				for (i = 0; i < points.Count - 1; i++)
-				{
-					lines.Add(new Line(points[i], points[i + 1], initPieceId));
-				}
-			}
-
-			return new Poly(points, lines, isPiece);
 		}
 
 		//多角形を読み込んで返す. エラー時はnullを返す.
