@@ -163,11 +163,13 @@ namespace PuzzleSolver.Geometry
 			cycle.Add(startPointId);
 
 			int pos = edgeTo[startPointId][startEdgeId];
+			int prevPos = -1;
 			used[startPointId][startEdgeId] = true;
 
 			while (pos != startPointId)
 			{
 				cycle.Add(pos);
+				int edgeId = getNextEdgeId(prevPos, pos);
 				int i;
 				for (i = 0; i < edgeTo[pos].Count; i++)
 				{
@@ -189,6 +191,7 @@ namespace PuzzleSolver.Geometry
 				}
 
 				used[pos][i] = true;
+				prevPos = pos;
 				pos = edgeTo[pos][i];
 			}
 			cycle.Add(startPointId);
@@ -238,6 +241,25 @@ namespace PuzzleSolver.Geometry
 			ret.Add(ret[0]);
 
 			return new Poly(ret, lines, isPiece);
+		}
+
+		//サイクルの検出で用いる。次に頂点posから、何番の辺を使って次の頂点に移動するかを探す。
+		//なければ-1を返す.
+		int getNextEdgeId(int prevPos, int pos)
+		{
+			int i;
+			Point a = pointList[prevPos] - pointList[pos];
+
+			for (i = 0; i < edgeTo[pos].Count; i++)
+			{
+				if (!used[pos][i]) { continue; }
+				int nextPos = edgeTo[pos][i];
+
+				Point b = pointList[nextPos] - pointList[pos];
+
+			}
+
+			return -1;
 		}
 
 		//1頂点で接している2つの枠穴を, 1つの枠穴にする。（接している頂点を起点として、頂点列をマージ）.

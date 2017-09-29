@@ -43,7 +43,7 @@ namespace PuzzleSolver
             read = new Read();
             controller = new Controller(new Point(0, 0), 5.0, 1400, 1000);
 
-			Puzzle initialPuzzle = ReadFile(@"C:\Users\naotti\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Aoki\problem_3.txt");
+			Puzzle initialPuzzle = ReadFile(@"C:\Users\naotti\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\27piece_1.txt");
 
 			if (initialPuzzle == null) { DX.Finalize(); return; }
             DX.ClsDx();
