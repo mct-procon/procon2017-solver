@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DxLib;
 using PuzzleSolver.Core;
 using PuzzleSolver.Geometry;
+using PuzzleSolver.Network;
 
 namespace PuzzleSolver.UI
 {
@@ -13,7 +14,7 @@ namespace PuzzleSolver.UI
     {
 		private Puzzle initialPuzzle;	//最初のパズル
         private View view;		//実体. 描画.
-        private Solve solve;	//実体. 回答.
+        private Solve solve;    //実体. 回答..
 
         //コンストラクタ
         public Controller() { }
@@ -31,13 +32,15 @@ namespace PuzzleSolver.UI
             ValueTuple<DX.KeyState, DX.Result> prev_key;
             ValueTuple<DX.KeyState, DX.Result> key;
 			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 1;
+			int beamWidth = 50;
 			int nowDepth = 0;
 			int maxDepth = initialPuzzle.wakus.Count + initialPuzzle.pieces.Count - 1;
 
 			key = DX.GetHitKeyStateAll();
 			for (int i = 0; i < 100; i++) { States.Add(new SkewHeap()); }
 			States[0].Push(initialPuzzle);
+
+			int strongDrawPieceId = -1;	//強調表示するピースの番号
 
 			while (true)
             {
@@ -71,7 +74,18 @@ namespace PuzzleSolver.UI
 					if (Network.ProconPuzzleService.IsPolygonReceived)
 					{
 						//支援システムから、Webカメラに写った多角形を読み取る。もし読み取れて、かつ、該当する多角形が存在すればViewクラスで表示。
+						Poly recivedPiece = Poly.ParsePolyFromQRCode(Network.ProconPuzzleService.Polygon, true, -1);
+						int id = CalcPieceId(ViewPuzzle, recivedPiece);
+						if (id != -1) { strongDrawPieceId = id; }
 					}
+
+					//強調表示
+					if (strongDrawPieceId != -1)
+					{
+
+					}
+
+					//パズルの表示
 					view.Draw(ViewPuzzle);
 
 					//デバッグとして、ビームサーチの評価値を表示してみよう。
@@ -104,5 +118,12 @@ namespace PuzzleSolver.UI
 				}
             }
         }
+
+		//引数：表示するPuzzle, 支援システムから受け取った多角形
+		//戻り値：強調表示すべきピースの番号. 該当するものがなければ-1を返す.
+		private int CalcPieceId(Puzzle puzzle, Poly piece)
+		{
+			return -1;
+		}
     }
 }
