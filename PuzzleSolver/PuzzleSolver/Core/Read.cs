@@ -67,7 +67,11 @@ namespace PuzzleSolver.Core
 				}
 			}
 
-			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, 0, pieceTable.Count);
+			//ピース存在フラグ
+			List<bool> isPieceExist = new List<bool>();
+			for (int i = 0; i < pieceTable.Count; i++) { isPieceExist.Add(true); }
+
+			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, isPieceExist, pieceTable.Count);
 
 			//盤面評価値, 盤面ハッシュ
 			puzzle.setBoardScore(0);

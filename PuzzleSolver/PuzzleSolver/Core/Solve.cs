@@ -20,23 +20,26 @@ namespace PuzzleSolver.Core
 		//ビームサーチの次状態更新
 		public void SetNextStates(Puzzle puzzle, int beamWidth, SkewHeap heap, HashSet<long> puzzlesInHeap)
 		{
-			if (puzzle.nowDepth >= puzzle.initPieceNum) { return; }
 			List<int> wakuIds = GetDistinationWakuId(puzzle.wakus);
 			if (wakuIds == null) { return; }
 
-			List<Poly> srcPolys = puzzle.pieceTable[puzzle.nowDepth];
-
-			foreach (int wakuId in wakuIds)
+			for (int srcPolyId = 0; srcPolyId < puzzle.pieceTable.Count; srcPolyId++)
 			{
-				Poly dstPoly = puzzle.wakus[wakuId];
-				for (int i = 0; i < srcPolys.Count; i++)
+				if (!puzzle.isPieceExist[srcPolyId]) { continue; }
+				List<Poly> srcPolys = puzzle.pieceTable[srcPolyId];
+
+				foreach (int wakuId in wakuIds)
 				{
-					int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);
-					if (score < 0) { continue; }
-					Puzzle nextPuzzle = GetNextPuzzle(puzzle, wakuId, i, score);
-					if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
+					Poly dstPoly = puzzle.wakus[wakuId];
+					for (int i = 0; i < srcPolys.Count; i++)
 					{
-						UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
+						int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);
+						if (score < 0) { continue; }
+						Puzzle nextPuzzle = GetNextPuzzle(puzzle, wakuId, srcPolyId, i, score);
+						if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
+						{
+							UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
+						}
 					}
 				}
 			}
@@ -123,13 +126,13 @@ namespace PuzzleSolver.Core
 
 		//結合後のパズルを得る。(マージ不可な場合は, nullを返す.) (使用時の前提：当たり判定は完了している)
 		//引数：結合前のPuzzle(const), くっつけ方(枠番号, ピースnowDepthの候補番号), 結合度.
-		private Puzzle GetNextPuzzle(Puzzle puzzle, int wakuId, int pieceListId, int score)
+		private Puzzle GetNextPuzzle(Puzzle puzzle, int wakuId, int pieceId, int pieceListId, int score)
 		{
 			Puzzle ret = puzzle.Clone();
 			Poly dstPoly, srcPoly;
 
 			dstPoly = ret.wakus[wakuId];
-			srcPoly = ret.pieceTable[ret.nowDepth][pieceListId].Clone();
+			srcPoly = ret.pieceTable[pieceId][pieceListId].Clone();
 
 			//ピースの移動
 			move(dstPoly, srcPoly, true);
@@ -159,7 +162,7 @@ namespace PuzzleSolver.Core
 			//srcPoly.isExist = false; srcPoly.points.Clear(); srcPoly.lines.Clear();
 
 			//盤面の深さ, 盤面評価, ハッシュの登録
-			ret.setNowDepth(puzzle.nowDepth + 1);
+			ret.setIsPieceExist(pieceId, false);
 			ret.setBoardScore(puzzle.boardScore + score);
 			ret.setBoardHash();
 

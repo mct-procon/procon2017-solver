@@ -64,7 +64,7 @@ namespace PuzzleSolver.UI
 			for (int i = 0; i < puzzle.wakuLines.Count; i++) { DrawLine(puzzle.wakuLines[i]); }
 			//頂点列
             for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; DrawPoly(puzzle.wakus[i]); }
-			for (int i = puzzle.nowDepth; i < puzzle.pieceTable.Count; i++) { DrawPoly(puzzle.pieceTable[i][0]); }
+			for (int i = 0; i < puzzle.pieceTable.Count; i++) { if (puzzle.isPieceExist[i]) { DrawPoly(puzzle.pieceTable[i][0]); } }
 			//ピース番号
 			DrawPieceIds(puzzle);
         }
@@ -137,8 +137,9 @@ namespace PuzzleSolver.UI
 				cnt[line.initPieceId]++;
 			}
 
-			for (i = puzzle.nowDepth; i < puzzle.initPieceNum; i++)
+			for (i = 0; i < puzzle.initPieceNum; i++)
 			{
+				if (!puzzle.isPieceExist[i]) { continue; }
 				for (j = 0; j < puzzle.pieceTable[i][0].lines.Count; j++)
 				{
 					Line line = puzzle.pieceTable[i][0].lines[j];
