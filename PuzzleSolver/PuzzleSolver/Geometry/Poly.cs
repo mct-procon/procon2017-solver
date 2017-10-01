@@ -9,10 +9,11 @@ namespace PuzzleSolver.Geometry
 {
     public class Poly
     {
-        /// <summary>
-        /// 点列(始点 = 終点). 実体.
-        /// </summary>
-        public List<Point> points { get; set; }
+		/// <summary>
+		/// 点列(始点 = 終点). 実体.
+		/// </summary>
+		private List<Point> _points;
+        public List<Point> points { get { return _points; } set { _points = value; minestPointId = GetMinestPointId(); } }
         /// <summary>
         /// 線分の集合. 実体.
         /// </summary>
@@ -27,7 +28,7 @@ namespace PuzzleSolver.Geometry
         public Poly() { }
         public Poly(List<Point> points, List<Line> lines, bool isPiece)
         {
-            this.points  = points;
+            this._points  = points;
             this.lines   = lines;
             this.isPiece = isPiece;
             this.isExist = true;

@@ -176,6 +176,7 @@ namespace PuzzleSolver.Core
 					}
 					poly.points[j] = new Point((double)Re, (double)Im);
 				}
+
 				if (j == poly.points.Count)
 				{
 					ret.Add(poly);
