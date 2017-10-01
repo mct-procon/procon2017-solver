@@ -39,8 +39,6 @@ namespace PuzzleSolver.UI
 			for (int i = 0; i < 100; i++) { States.Add(new SkewHeap()); }
 			States[0].Push(initialPuzzle);
 
-			int LoopCount = 0;
-
 			while (true)
             {
                 bool breakFlag = false;
@@ -70,11 +68,10 @@ namespace PuzzleSolver.UI
 
 					//表示したいパズルを渡す
 					Puzzle ViewPuzzle = States[nowDepth].MaxValue();
-					if (LoopCount % 10 == 0)
+					if (Network.ProconPuzzleService.IsPolygonReceived)
 					{
 						//支援システムから、Webカメラに写った多角形を読み取る。もし読み取れて、かつ、該当する多角形が存在すればViewクラスで表示。
 					}
-					LoopCount++;			//上記の処理のみで使っているので、ここにカウントアップを書いた。
 					view.Draw(ViewPuzzle);
 
 					//デバッグとして、ビームサーチの評価値を表示してみよう。

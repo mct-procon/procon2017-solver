@@ -39,8 +39,8 @@ namespace PuzzleSolver.Core
 						{
 							for (int option = 0; option < 4; option++)
 							{
-								int direction = option / 2;
-								bool turnflag = (option % 2 == 1);
+								int direction = option >> 1;   // means : option / 2
+								bool turnflag = (option & 1) == 1;  // means : (option % 2) == 1
 								int score = getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag, heap.Count == beamWidth ? heap.MinValue().boardScore + 1 - puzzle.boardScore : -1);
 								if (score < 0) { continue; }
 
