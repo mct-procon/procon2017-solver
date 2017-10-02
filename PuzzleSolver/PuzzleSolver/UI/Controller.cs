@@ -40,7 +40,7 @@ namespace PuzzleSolver.UI
 			for (int i = 0; i < 100; i++) { States.Add(new SkewHeap()); }
 			States[0].Push(initialPuzzle);
 
-			int strongDrawPieceId = -1;	//強調表示するピースの番号
+			int strongDrawPieceId = -1; //強調表示するピースの番号
 
 			while (true)
             {
@@ -188,21 +188,29 @@ namespace PuzzleSolver.UI
 			Scaling(poly2);
 
 			int n = poly1.Count;
-			for (i = 0; i < n; i++)	//poly1[0], poly2[i]から走査
-			{
-				double maxLogScale = 0;
-				for (j = 0; j < n; j++)
-				{
-					Point a = poly1[j + 1] - poly1[j];
-					Point b = poly2[i + j + 1] - poly2[i + j];
 
-					if (a.Abs < 1e-9 || b.Abs < 1e-9)
-					{
-						return 1145141919;
-					}
-					maxLogScale = Math.Max(maxLogScale, Math.Abs(Math.Log(a.Abs / b.Abs)));
+			for (int turnflag = 0; turnflag <= 1; turnflag++)
+			{
+				if (turnflag == 1)
+				{
+					poly1.Turn(false);
 				}
-				ret = Math.Min(ret, maxLogScale);
+				for (i = 0; i < n; i++) //poly1[0], poly2[i]から走査
+				{
+					double maxLogScale = 0;
+					for (j = 0; j < n; j++)
+					{
+						Point a = poly1[j + 1] - poly1[j];
+						Point b = poly2[i + j + 1] - poly2[i + j];
+
+						if (a.Abs < 1e-9 || b.Abs < 1e-9)
+						{
+							return 1145141919;
+						}
+						maxLogScale = Math.Max(maxLogScale, Math.Abs(Math.Log(a.Abs / b.Abs)));
+					}
+					ret = Math.Min(ret, maxLogScale);
+				}
 			}
 			return ret;
 		}
