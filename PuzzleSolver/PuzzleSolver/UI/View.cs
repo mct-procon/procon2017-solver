@@ -75,16 +75,20 @@ namespace PuzzleSolver.UI
         }
 
 		//強調表示
-		public void DrawPieceStrong(Puzzle puzzle, int pieceId)
+		public void DrawPieceStrong(Puzzle puzzle, int pieceId, bool turnflag)
 		{
 			int i, j;
+			DX.Color color;
+
+			if (turnflag == false) { color = new DX.Color(255, 128, 0); }
+			else { color = new DX.Color(0, 128, 255); }
 
 			for (i = 0; i < puzzle.wakuLines.Count; i++)
 			{
 				Line line = puzzle.wakuLines[i];
 				if (line.initPieceId == pieceId)
 				{
-					DrawLine(line, new DX.Color(255, 128, 0), 4);
+					DrawLine(line, color, 4);
 				}
 			}
 
@@ -95,7 +99,7 @@ namespace PuzzleSolver.UI
 					Line line = puzzle.pieces[i].lines[j];
 					if (line.initPieceId == pieceId)
 					{
-						DrawLine(line, new DX.Color(255, 128, 0), 4);
+						DrawLine(line, color, 4);
 					}
 				}
 			}

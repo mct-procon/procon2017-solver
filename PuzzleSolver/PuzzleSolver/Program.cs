@@ -61,7 +61,10 @@ namespace PuzzleSolver
 #endif
             }
 
-			Puzzle initialPuzzle = ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Aoki\problem_5.txt");
+			Puzzle initialPuzzle;
+			//initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\ProconSample\qrresult.txt");
+			while (!Network.ProconPuzzleService.IsQrCodeReceived) ;
+			initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
 			if (initialPuzzle == null) { DX.Finalize(); return; }
 
 			controller.Solve(initialPuzzle);

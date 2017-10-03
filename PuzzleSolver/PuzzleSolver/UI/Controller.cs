@@ -32,7 +32,7 @@ namespace PuzzleSolver.UI
             ValueTuple<DX.KeyState, DX.Result> prev_key;
             ValueTuple<DX.KeyState, DX.Result> key;
 			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 50;
+			int beamWidth = 5;
 			int nowDepth = 0;
 			int maxDepth = initialPuzzle.wakus.Count + initialPuzzle.pieces.Count - 1;
 
@@ -76,6 +76,7 @@ namespace PuzzleSolver.UI
 						//支援システムから、Webカメラに写った多角形を読み取る。もし読み取れて、かつ、該当する多角形が存在すればViewクラスで表示。
 						Poly recivedPiece = Poly.ParsePolyFromQRCode(Network.ProconPuzzleService.Polygon, true, -1);
 						int id = CalcPieceId(ViewPuzzle, recivedPiece);
+						//DX.WriteLineDx("recived!");
 						if (id != -1) { strongDrawPieceId = id; }
 					}
 
@@ -85,7 +86,7 @@ namespace PuzzleSolver.UI
 					//強調表示
 					if (strongDrawPieceId != -1)
 					{
-						view.DrawPieceStrong(ViewPuzzle, strongDrawPieceId);
+						view.DrawPieceStrong(ViewPuzzle, strongDrawPieceId, false);
 					}
 
 					//デバッグとして、ビームサーチの評価値を表示してみよう。
@@ -163,7 +164,10 @@ namespace PuzzleSolver.UI
 			{
 				initPieces[i].Add(initPieces[i][0]);
 				Poly initPiece = new Poly(initPieces[i], new List<Line>(), true);
-				double a = EvalLogScale(initPiece, piece.Clone());
+				double eval1 = EvalCircleRadiusLog(initPiece.Clone(), piece.Clone());
+				double eval2 = EvalSumLengthLog(initPiece, piece.Clone());
+				double a = Math.Max(eval1, eval2);
+
 				if (minA > a)
 				{
 					minA = a;
@@ -174,96 +178,103 @@ namespace PuzzleSolver.UI
 		}
 
 
-		//なんかあれ
-		private double EvalLogScale(Poly poly1, Poly poly2)
+		//類似度計算。
+		//アルゴリズム：
+		//poly1とpoly2を「面積が1」になるように拡大・縮小する。
+		//外接円の半径r1, r2をそれぞれ求める。
+		//Abs(Log(r1 / r2))を返す。
+		private double EvalCircleRadiusLog(Poly poly1, Poly poly2)
 		{
-			int i, j;
-			double ret = 1145141919;
-			double errorDeg = 10;
-
-			poly1 = RemovePoints(poly1, errorDeg);
-			poly2 = RemovePoints(poly2, errorDeg);
-			if (poly1.Count != poly2.Count) { return 1145141919; }
-			Scaling(poly1);
-			Scaling(poly2);
-
-			int n = poly1.Count;
-
-			for (int turnflag = 0; turnflag <= 1; turnflag++)
+			if (Math.Abs(poly1.Area) < 1e-9 || Math.Abs(poly2.Area) < 1e-9)
 			{
-				if (turnflag == 1)
-				{
-					poly1.Turn(false);
-				}
-				for (i = 0; i < n; i++) //poly1[0], poly2[i]から走査
-				{
-					double maxLogScale = 0;
-					for (j = 0; j < n; j++)
-					{
-						Point a = poly1[j + 1] - poly1[j];
-						Point b = poly2[i + j + 1] - poly2[i + j];
-
-						if (a.Abs < 1e-9 || b.Abs < 1e-9)
-						{
-							return 1145141919;
-						}
-						maxLogScale = Math.Max(maxLogScale, Math.Abs(Math.Log(a.Abs / b.Abs)));
-					}
-					ret = Math.Min(ret, maxLogScale);
-				}
+				return 1145141919;
 			}
-			return ret;
+
+			Scaling(poly1, 1.0 / Math.Sqrt(Math.Abs(poly1.Area)));
+			Scaling(poly2, 1.0 / Math.Sqrt(Math.Abs(poly2.Area)));
+			FixPoly(poly1, 0.01);
+			FixPoly(poly2, 0.01);
+
+			Circle c1 = poly1.MinestCoverCircle();
+			Circle c2 = poly2.MinestCoverCircle();
+			double r1 = c1.r;
+			double r2 = c2.r;
+			if (r1 < 1e-9 || r2 < 1e-9) { return 1145141919; }
+			return Math.Abs(Math.Log(r1 / r2));
 		}
 
-		///角度が180度に近い頂点を取り除く
-		private Poly RemovePoints(Poly poly, double errorDegree)
+		//類似度計算2
+		//アルゴリズム：
+		//poly1とpoly2を「面積が1」になるように拡大・縮小する。
+		//周の長さl1, l2をそれぞれ求める。
+		//Abs(Log(l1 / l2))を返す。
+		private double EvalSumLengthLog(Poly poly1, Poly poly2)
 		{
-			int i;
-			const double PAI = 3.14159265358979;
-			Poly ret = new Poly(new List<Point>(), new List<Line>(), true);
-
-			for (i = 0; i < poly.Count; i++)
+			if (Math.Abs(poly1.Area) < 1e-9 || Math.Abs(poly2.Area) < 1e-9)
 			{
-				Point a = poly[i - 1];
-				Point b = poly[i];
-				Point c = poly[i + 1];
-
-				Point ba = a - b;
-				Point cb = c - b;
-				Point hoge = (ba / cb);
-
-				double deg = Math.Atan2(hoge.Im, hoge.Re) * 180 / PAI;
-				if (deg < 0) { deg += 360; }
-
-				if (Math.Abs(deg - 180) <= errorDegree)
-				{
-					continue;
-				}
-
-				ret.points.Add(b);
+				return 1145141919;
 			}
-			ret.points.Add(ret.points[0]);
 
-			return ret;
+			Scaling(poly1, 1.0 / Math.Sqrt(Math.Abs(poly1.Area)));
+			Scaling(poly2, 1.0 / Math.Sqrt(Math.Abs(poly2.Area)));
+			FixPoly(poly1, 0.01);
+			FixPoly(poly2, 0.01);
+
+			int i;
+			double sumLength1 = 0;
+			double sumLength2 = 0;
+
+			for (i = 0; i < poly1.Count; i++) { sumLength1 += (poly1[i + 1] - poly1[i]).Abs; }
+			for (i = 0; i < poly2.Count; i++) { sumLength2 += (poly2[i + 1] - poly2[i]).Abs; }
+			if (sumLength1 < 1e-9 || sumLength2 < 1e-9) { return 1145141919; }
+			return Math.Abs(Math.Log(sumLength1 / sumLength2));
 		}
 
-		//正規化 (最も短い辺の長さが1になるように拡大（縮小）する）
-		private void Scaling(Poly poly)
+		//scale倍拡大する。scale < 1なら縮小。原点の座標が(0, 0)になる。
+		private void Scaling(Poly poly, double scale)
 		{
-			double minLength = 1145141919;
-			int i;
-
 			poly.Trans(poly.points[0], false);
 
-			for (i = 0; i < poly.Count; i++)
+			//scale倍拡大する。
+			for (int i = 0; i < poly.points.Count; i++)
 			{
-				minLength = Math.Min(minLength, (poly.points[i + 1] - poly.points[i]).Abs);
+				poly.points[i] *= scale;
 			}
+		}
 
-			//minLength倍縮小する。
-			for (i = 0; i < poly.Count; i++)
+		//以下を繰り返す
+		//・隣接する3頂点a,b,cで三角形を作ったときに、高さがdist以下だったら、bを取り除く.多角形を更新して、頂点0から再度探索する.
+		private void FixPoly(Poly poly, double distError)
+		{
+			int i;
+
+			while (poly.Count > 3)
 			{
-				poly[i] /= minLength;
+				for (i = 0; i < poly.Count; i++)
+				{
+					Point a = poly[i - 1];
+					Point b = poly[i];
+					Point c = poly[i + 1];
+					double area = Math.Abs(Point.Cross(c - a, b - a));
+					if ((c - a).Abs < 1e-9) { return; }
+					double dist = area / (c - a).Abs;
+					if (dist <= distError)
+					{
+						break;
+					}
+				}
+				if (i == poly.Count) { break; }
+
+				List<Point> newPoints = new List<Point>();
+				int id = i;
+				for (i = 0; i < poly.Count; i++)
+				{
+					if (i == id) { continue; }
+					newPoints.Add(poly.points[i]);
+				}
+				newPoints.Add(newPoints[0]);
+
+				poly = new Poly(newPoints, new List<Line>(), true);
 			}
 		}
     }
