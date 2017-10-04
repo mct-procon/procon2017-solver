@@ -71,7 +71,7 @@ namespace PuzzleSolver.Geometry
 				}
 				if (area > -dstPoly.Area)
 				{
-					//頂点列の結合をして, 1つの枠穴として返す. 結合の始点
+					//頂点列の結合をして, 1つの枠穴として返す.
 					ret = MargeTwoWaku(ret);
 				}
 			}
@@ -272,6 +272,13 @@ namespace PuzzleSolver.Geometry
 		//使用時の前提：2つの枠穴の頂点列の向きは異なる向きになっている。
 		List<Poly> MargeTwoWaku(List<Poly> wakus)
 		{
+			if (wakus[0].Area > 0)
+			{
+				Poly t = wakus[0];
+				wakus[0] = wakus[1];
+				wakus[1] = t;
+			}
+
 			Dictionary<Point, int> Counts = new Dictionary<Point, int>();
 			int i, j, k;
 
@@ -323,6 +330,7 @@ namespace PuzzleSolver.Geometry
 			{
 				poly.points.Reverse();
 			}
+			poly.UpdateMinestPointId();
 
 			List<Poly> ret = new List<Poly>();
 			ret.Add(poly);

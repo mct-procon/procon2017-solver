@@ -20,37 +20,33 @@ namespace PuzzleSolver.Core
 		//ビームサーチの次状態更新
 		public void SetNextStates(Puzzle puzzle, int beamWidth, SkewHeap heap, HashSet<long> puzzlesInHeap)
 		{
-			List<int> wakuIds = GetDistinationWakuId(puzzle.wakus);
-			if (wakuIds == null) { return; }
+			int wakuId = GetDistinationWakuId(puzzle.wakus);
+			if (wakuId < 0) { return; }
 
 			for (int srcPolyId = 0; srcPolyId < puzzle.pieceTable.Count; srcPolyId++)
 			{
 				if (!puzzle.isPieceExist[srcPolyId]) { continue; }
 				List<Poly> srcPolys = puzzle.pieceTable[srcPolyId];
 
-				foreach (int wakuId in wakuIds)
+				Poly dstPoly = puzzle.wakus[wakuId];
+				for (int i = 0; i < srcPolys.Count; i++)
 				{
-					Poly dstPoly = puzzle.wakus[wakuId];
-					for (int i = 0; i < srcPolys.Count; i++)
+					int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);
+					if (score < 0) { continue; }
+					Puzzle nextPuzzle = GetNextPuzzle(puzzle, wakuId, srcPolyId, i, score);
+					if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
 					{
-						int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);
-						if (score < 0) { continue; }
-						Puzzle nextPuzzle = GetNextPuzzle(puzzle, wakuId, srcPolyId, i, score);
-						if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
-						{
-							UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
-						}
+						UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
 					}
 				}
 			}
 		}
 
-		//dstination頂点の属する可能性のある枠の番号を返す. dstination頂点 = 枠Xの頂点番号Yのとき, {X}を返す.
+		//dstination頂点の属する可能性のある枠の番号を1つ返す. dstination頂点 = 枠Xの頂点番号Yのとき, Xを返す.
 		//枠の頂点がない場合は, nullを返す。
-		public List<int> GetDistinationWakuId(List<Poly> wakus)
+		public int GetDistinationWakuId(List<Poly> wakus)
 		{
 			int X = -1;
-			List<int> ret = new List<int>();
 
 			for (int i = 0; i < wakus.Count; i++)
 			{
@@ -60,17 +56,8 @@ namespace PuzzleSolver.Core
 					X = i;
 				}
 			}
-			if (X == -1) { return null; }
-
-			for (int i = 0; i < wakus.Count; i++)
-			{
-				if (!wakus[i].isExist || wakus[i].Count <= 0) { continue; }
-				if (Point.Compare(wakus[X].points[wakus[X].minestPointId], wakus[i].points[wakus[i].minestPointId]) == 0)
-				{
-					ret.Add(i);
-				}
-			}
-			return ret;
+			if (X == -1) { return -1; }
+			return X;
 		}
 
 		//ビームを更新するか

@@ -12,8 +12,7 @@ namespace PuzzleSolver.Geometry
 		/// <summary>
 		/// 点列(始点 = 終点). 実体.
 		/// </summary>
-		private List<Point> _points;
-        public List<Point> points { get { return _points; } set { _points = value; minestPointId = GetMinestPointId(); } }
+		public List<Point> points;
         /// <summary>
         /// 線分の集合. 実体.
         /// </summary>
@@ -21,19 +20,28 @@ namespace PuzzleSolver.Geometry
         public bool isPiece;
         public bool isExist;
 
-		//X座標最小の点（複数あればそれらのうちY座標最小の点）の点番号 (常に正しい値が入るように更新される）
+		//X座標最小の点（複数あればそれらのうちY座標最小の点）の点番号 
+		//（初期化・(平行移動・)回転・反転時は自動更新されますが、それ以外の場合はUpdateMinestPointId()を使って設定します。）
+		//本当は、points.Reverse()とかpoints[i] = valueとかするたびに、更新するのが安全なのですが、そうすると遅くなってしまう可能性があるので、
+		//この値を設定したい場合だけ設定するようにしました。(ただし、保守性は下がる）
 		public int minestPointId { get; private set; }
 
 		//コンストラクタ
         public Poly() { }
         public Poly(List<Point> points, List<Line> lines, bool isPiece)
         {
-            this._points  = points;
+			this.points = points;
             this.lines   = lines;
             this.isPiece = isPiece;
             this.isExist = true;
 			this.minestPointId = GetMinestPointId();
         }
+
+		//X座標最小の点(minestPointId)の設定
+		public void UpdateMinestPointId()
+		{
+			this.minestPointId = GetMinestPointId();
+		}
 
         //多角形の頂点数
         public int Count { get { return points.Count - 1; } }

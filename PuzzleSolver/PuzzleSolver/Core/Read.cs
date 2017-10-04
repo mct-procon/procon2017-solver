@@ -38,6 +38,7 @@ namespace PuzzleSolver.Core
 
 				//時計回りの頂点列にする
 				if (poly.Area > 0) { poly.points.Reverse(); }
+				poly.UpdateMinestPointId();
 
 				wakus.Add(poly);
 			}
@@ -145,7 +146,7 @@ namespace PuzzleSolver.Core
 			return ret;
 		}
 
-		//Validな回転方法 (すべての点座標が整数になる原点中心の回転をしたあとのピース）をすべて返す
+		//Validな回転方法 (すべての点座標が整数になる原点中心の回転をしたあとのピース）をすべて返す (minestPointIdは更新する)
 		private List<Poly> GetRotatedPieceList(Poly piece)
 		{
 			for (int k = 0; k < piece.Count; k++)
@@ -180,6 +181,7 @@ namespace PuzzleSolver.Core
 					}
 					poly.points[j] = new Point((double)Re, (double)Im);
 				}
+				poly.UpdateMinestPointId();
 
 				if (j == poly.points.Count)
 				{
