@@ -43,9 +43,6 @@ namespace PuzzleSolver
             read = new Read();
             controller = new Controller(new Point(0, 0), 5.0, 1400, 1000);
 
-			Puzzle initialPuzzle = ReadFile(@"C:\Users\Hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\ProconSample\qrresult.txt");
-
-			if (initialPuzzle == null) { DX.Finalize(); return; }
             DX.ClsDx();
 
             WCFServer = new Network.WCF();
@@ -61,7 +58,14 @@ namespace PuzzleSolver
 #endif
             }
 
-            controller.Solve(initialPuzzle);
+			//パズルを読む
+			Puzzle initialPuzzle;
+			//initialPuzzle= ReadFile(@"C:\Users\Hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\ProconSample\qrresult.txt");
+			while (!Network.ProconPuzzleService.IsQrCodeReceived) ;
+			initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
+			if (initialPuzzle == null) { DX.Finalize(); return; }
+
+			controller.Syakunetsukun(initialPuzzle);
 
             WCFServer.Close();
 

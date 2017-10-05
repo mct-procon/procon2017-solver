@@ -274,5 +274,65 @@ namespace PuzzleSolver.Geometry
 			ret.isExist = isExist;
             return ret;
         }
-    }
+
+		//型変換
+		public static Poly ParsePolyFromQRCode(Procon2017MCTProtocol.SendablePolygon polygon, bool isPiece, sbyte initPieceId = -1)
+		{
+			int i;
+			List<Point> points = new List<Point>();
+			List<Line> lines = new List<Line>();
+
+			for (i = 0; i < polygon.Points.Count; i++)
+			{
+				points.Add(new Point(polygon.Points[i].X, polygon.Points[i].Y));
+			}
+			points.Add(points[0]);
+
+			//表示する線分の設定 (ピースのみ)
+			if (isPiece)
+			{
+				for (i = 0; i < points.Count - 1; i++)
+				{
+					lines.Add(new Line(points[i], points[i + 1], initPieceId));
+				}
+			}
+
+			Poly poly = new Poly(points, lines, isPiece);
+
+			if (isPiece && poly.Area < 0) { poly.points.Reverse(); }
+			if (!isPiece && poly.Area > 0) { poly.points.Reverse(); }
+			return poly;
+		}
+
+
+		//最小包含円の半径. ランダムソートしておけば、期待計算量O(N), 最悪O(N^3). Nは頂点数.
+		//http://tubo28.me/algorithm/minball/ を参考に作成。
+		public Circle MinestCoverCircle()
+		{
+			Circle c = Circle.MakeCircle2(points[0], points[1]);
+
+			for (int i = 2; i < Count; i++)
+			{
+				if (!c.IsInCircle(points[i]))
+				{
+					c = Circle.MakeCircle2(points[0], points[i]);
+					for (int j = 0; j < i; j++)
+					{
+						if (!c.IsInCircle(points[j]))
+						{
+							c = Circle.MakeCircle2(points[i], points[j]);
+							for (int k = 0; k < j; k++)
+							{
+								if (!c.IsInCircle(points[k]))
+								{
+									c = Circle.MakeCircle3(points[i], points[j], points[k]);
+								}
+							}
+						}
+					}
+				}
+			}
+			return c;
+		}
+	}
 }
