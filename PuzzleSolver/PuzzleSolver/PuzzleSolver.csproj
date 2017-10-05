@@ -71,7 +71,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Geometry\Circle.cs" />
-    <Compile Include="Core\PoolManager.cs" />
     <Compile Include="Geometry\Generic.cs" />
     <Compile Include="Geometry\SkewHeapNode.cs" />
     <Compile Include="Geometry\SkewHeap.cs" />
@@ -82,7 +81,7 @@
     <Compile Include="Geometry\Point.cs" />
     <Compile Include="Geometry\Poly.cs" />
     <Compile Include="Core\Puzzle.cs" />
-    <Compile Include="Core\Solve.cs" />
+    <Compile Include="Core\Solver.cs" />
     <Compile Include="UI\View.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

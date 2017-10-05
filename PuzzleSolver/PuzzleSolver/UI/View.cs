@@ -196,5 +196,5 @@ namespace PuzzleSolver.UI
             Point p = cellPoint + center + CenterPoint;
             return (p - center) * Scale + center;
         }
-    }
+	}
 }

@@ -10,115 +10,90 @@ using PuzzleSolver.Network;
 
 namespace PuzzleSolver.UI
 {
-    public class Controller
-    {
-		private Puzzle initialPuzzle;	//最初のパズル
-        private View view;		//実体. 描画.
-        private Solve solve;    //実体. 回答..
+	public class Controller
+	{
+		private View view;      //実体. 描画.
+		private Solver solve;    //実体. 回答..
 
-        //コンストラクタ
-        public Controller() { }
-        public Controller(Point t, double scale, int windowSizeX, int windowSizeY)
-        {
-            view	    	= new View(t, scale, windowSizeX, windowSizeY);
-            solve  			= new Solve();
-        }
+		//コンストラクタ
+		public Controller() { }
+		public Controller(Point t, double scale, int windowSizeX, int windowSizeY)
+		{
+			view = new View(t, scale, windowSizeX, windowSizeY);
+			solve = new Solver();
+		}
 
-        //問題を解く
-        public void Solve(Puzzle initalPuzzle)
-        {
-			this.initialPuzzle = initalPuzzle;
 
-            ValueTuple<DX.KeyState, DX.Result> prev_key;
-            ValueTuple<DX.KeyState, DX.Result> key;
-			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 5;
-			int nowDepth = 0;
-			int maxDepth = initialPuzzle.wakus.Count + initialPuzzle.pieces.Count - 1;
+		// 1問につき、1回実行される
+		// ・ビュー（パズルの表示, 強調表示）
+		// ・ソルバ（計算）
+		// でそれぞれ1つずつのスレッドを立ち上げる。
+		// ソルバのViewPuzzleの中身をビューで表示する。
+		public void Syakunetsukun(Puzzle initialPuzzle)
+		{
+			//ソルバのスレッドを立ち上げる
+			Task.Run(() => solve.Solve(initialPuzzle));
+			//solve.Solve(initialPuzzle);
+
+			//コントロール(表示指令）
+			ValueTuple<DX.KeyState, DX.Result> prev_key;
+			ValueTuple<DX.KeyState, DX.Result> key;
+			int strongDrawPieceId = -1; //強調表示するピースの番号
+			int cursor = 0;			//カーソル
 
 			key = DX.GetHitKeyStateAll();
-			for (int i = 0; i < 100; i++) { States.Add(new SkewHeap()); }
-			States[0].Push(initialPuzzle);
+			while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0)
+			{
+				prev_key = key;
+				key = DX.GetHitKeyStateAll();
 
-			int strongDrawPieceId = -1; //強調表示するピースの番号
+				//キー操作
+				if (key.Item1[DX.KeyInput.Escape])
+					return;
 
-			while (true)
-            {
-                bool breakFlag = false;
-                while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0)
-                {
-                    prev_key = key;
-                    key = DX.GetHitKeyStateAll();
-
-                    if (key.Item1[DX.KeyInput.Escape])
-                        return;
-
-                    if (!prev_key.Item1[DX.KeyInput.NumPadEnter] && key.Item1[DX.KeyInput.NumPadEnter])
-                    {
-                        breakFlag = true;
-                        break;
-                    }
-                    if (!prev_key.Item1[DX.KeyInput.Back] && key.Item1[DX.KeyInput.Back])
-                    {
-						//1手戻す
-						if (nowDepth > 0)
-						{
-							nowDepth--;
-						}
-                    }
-
-                    view.UpdateDrawInfo();
-
-					//表示したいパズルを渡す
-					Puzzle ViewPuzzle = States[nowDepth].MaxValue();
-					if (Network.ProconPuzzleService.IsPolygonReceived)
-					{
-						//支援システムから、Webカメラに写った多角形を読み取る。もし読み取れて、かつ、該当する多角形が存在すればViewクラスで表示。
-						Poly recivedPiece = Poly.ParsePolyFromQRCode(Network.ProconPuzzleService.Polygon, true, -1);
-						int id = CalcPieceId(ViewPuzzle, recivedPiece);
-						//DX.WriteLineDx("recived!");
-						if (id != -1) { strongDrawPieceId = id; }
-					}
-
-					//パズルの表示
-					view.Draw(ViewPuzzle);
-
-					//強調表示
-					if (strongDrawPieceId != -1)
-					{
-						view.DrawPieceStrong(ViewPuzzle, strongDrawPieceId, false);
-					}
-
-					//デバッグとして、ビームサーチの評価値を表示してみよう。
-					SkewHeap hoge = States[nowDepth].CloneShallow();
-					while (hoge.Count > 0)
-					{
-						DX.DrawString(100 + (hoge.Count / 25) * 400, 200 + (hoge.Count % 25) * 22, 0, hoge.Pop().boardScore.ToString());
-					}
-                }
-                if (!breakFlag) { return; }
-
-				//パズルを解く (1手進める) → ビームサーチ
-				if (nowDepth < maxDepth)
+				if (!prev_key.Item1[DX.KeyInput.NumPadEnter] && key.Item1[DX.KeyInput.NumPadEnter])
 				{
-					HashSet<long> puzzlesInHeap = new HashSet<long>();
-					SkewHeap backupLogForDisplay = States[nowDepth].CloneShallow();
-					States[nowDepth + 1] = new SkewHeap();
-
-					while (States[nowDepth].Count > 0)
+					if (cursor + 1 < solve.ViewPuzzles.Count)
 					{
-						Puzzle nowPuzzle = States[nowDepth].Pop().Clone();
-
-						int doBeamWidth = beamWidth;
-						//if (nowDepth % 6 == 0) { doBeamWidth = 3; }
-
-						solve.SetNextStates(nowPuzzle, doBeamWidth, States[nowDepth + 1], puzzlesInHeap);
+						cursor++;
 					}
-					States[nowDepth] = backupLogForDisplay;
-					if (States[nowDepth + 1].Count > 0) { nowDepth++; }
 				}
-            }
-        }
+
+				if (!prev_key.Item1[DX.KeyInput.Back] && key.Item1[DX.KeyInput.Back])
+				{
+					//表示を1手戻す
+					if (cursor > 0)
+					{
+						cursor--;
+					}
+				}
+
+				view.UpdateDrawInfo();
+
+				//ViewPuzzles.Count == 0だったら表示に移らない
+				if (solve.ViewPuzzles.Count == 0) { continue; }
+
+				//表示したいパズルを渡す
+				Puzzle ViewPuzzle = solve.ViewPuzzles[cursor];
+				if (Network.ProconPuzzleService.IsPolygonReceived)
+				{
+					//支援システムから、Webカメラに写った多角形を読み取る。もし読み取れて、かつ、該当する多角形が存在すればViewクラスで表示。
+					Poly recivedPiece = Poly.ParsePolyFromQRCode(Network.ProconPuzzleService.Polygon, true, -1);
+					int id = CalcPieceId(ViewPuzzle, recivedPiece);
+					//DX.WriteLineDx("recived!");
+					if (id != -1) { strongDrawPieceId = id; }
+				}
+
+				//パズルの表示
+				view.Draw(ViewPuzzle);
+
+				//強調表示
+				if (strongDrawPieceId != -1)
+				{
+					view.DrawPieceStrong(ViewPuzzle, strongDrawPieceId, false);
+				}
+			}
+		}
 
 
 		//引数：表示するPuzzle, 支援システムから受け取った多角形
@@ -127,7 +102,7 @@ namespace PuzzleSolver.UI
 		{
 			List<List<Point>> initPieces = new List<List<Point>>();
 			int i, j;
-			
+
 			for (i = 0; i < puzzle.initPieceNum; i++)
 			{
 				initPieces.Add(new List<Point>());
@@ -277,5 +252,5 @@ namespace PuzzleSolver.UI
 				poly = new Poly(newPoints, new List<Line>(), true);
 			}
 		}
-    }
+	}
 }
