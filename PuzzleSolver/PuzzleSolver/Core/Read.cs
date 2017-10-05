@@ -39,6 +39,7 @@ namespace PuzzleSolver.Core
 				//時計回りの頂点列にする
 				if (poly.Area > 0) { poly.points.Reverse(); }
 
+				poly.UpdateMinestPointId();
 				wakus.Add(poly);
 			}
 
@@ -176,6 +177,7 @@ namespace PuzzleSolver.Core
 					}
 					poly.points[j] = new Point((double)Re, (double)Im);
 				}
+				poly.UpdateMinestPointId();
 
 				if (j == poly.points.Count)
 				{

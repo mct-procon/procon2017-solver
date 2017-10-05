@@ -12,8 +12,7 @@ namespace PuzzleSolver.Geometry
 		/// <summary>
 		/// 点列(始点 = 終点). 実体.
 		/// </summary>
-		private List<Point> _points;
-        public List<Point> points { get { return _points; } set { _points = value; minestPointId = GetMinestPointId(); } }
+		public List<Point> points;
         /// <summary>
         /// 線分の集合. 実体.
         /// </summary>
@@ -21,19 +20,26 @@ namespace PuzzleSolver.Geometry
         public bool isPiece;
         public bool isExist;
 
-		//X座標最小の点（複数あればそれらのうちY座標最小の点）の点番号 (常に正しい値が入るように更新される）
+		//X座標最小の点（複数あればそれらのうちY座標最小の点）の点番号
+		//UpdateMinestPointId()を呼び出すことで更新されます。回転, 反転時は自動で更新されます。
 		public int minestPointId { get; private set; }
 
 		//コンストラクタ
         public Poly() { }
         public Poly(List<Point> points, List<Line> lines, bool isPiece)
         {
-            this._points  = points;
+            this.points  = points;
             this.lines   = lines;
             this.isPiece = isPiece;
             this.isExist = true;
 			this.minestPointId = GetMinestPointId();
         }
+
+		//minestPointIdの更新
+		public void UpdateMinestPointId()
+		{
+			this.minestPointId = GetMinestPointId();
+		}
 
         //多角形の頂点数
         public int Count { get { return points.Count - 1; } }
@@ -113,17 +119,17 @@ namespace PuzzleSolver.Geometry
         //平行移動
         public void Trans(Point t, bool isUpdateLines)
         {
-            for (int i = 0; i < _points.Count; i++) { _points[i] += t; }
+            for (int i = 0; i < points.Count; i++) { points[i] += t; }
             if (isUpdateLines) { for (int i = 0; i < lines.Count; i++) { lines[i].Trans(t); } }
         }
 
         //反転 (軸はy = 0)
         public void Turn(bool isUpdateLines)
         {
-            for (int i = 0; i < _points.Count; i++) { _points[i] = _points[i].Conj; }
+            for (int i = 0; i < points.Count; i++) { points[i] = points[i].Conj; }
 
-            int l = 0, r = _points.Count - 1;
-            while (l < r) { Point t = _points[l]; _points[l] = _points[r]; _points[r] = t; l++; r--; }
+            int l = 0, r = points.Count - 1;
+            while (l < r) { Point t = points[l]; points[l] = points[r]; points[r] = t; l++; r--; }
             if (isUpdateLines) { for (int i = 0; i < lines.Count; i++) { lines[i].Turn(); } }
 			this.minestPointId = GetMinestPointId();
 		}
@@ -131,7 +137,7 @@ namespace PuzzleSolver.Geometry
         //乗算 (回転)
         public void Mul (Point mulValue, bool isUpdateLines)
         {
-            for (int i = 0; i < _points.Count; i++) { _points[i] = _points[i] * mulValue; }
+            for (int i = 0; i < points.Count; i++) { points[i] = points[i] * mulValue; }
             if (isUpdateLines) { for (int i = 0; i < lines.Count; i++) { lines[i].Mul(mulValue); } }
 			this.minestPointId = GetMinestPointId();
 		}

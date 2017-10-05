@@ -275,6 +275,13 @@ namespace PuzzleSolver.Geometry
 			Dictionary<Point, int> Counts = new Dictionary<Point, int>();
 			int i, j, k;
 
+			if (wakus[0].Area > 0)
+			{
+				Poly t = wakus[0];
+				wakus[0] = wakus[1];
+				wakus[1] = t;
+			}
+
 			for (i = 0; i < wakus.Count; i++)
 			{
 				for (j = 0; j < wakus[i].Count; j++)
