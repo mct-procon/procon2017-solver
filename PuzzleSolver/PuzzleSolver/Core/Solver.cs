@@ -11,12 +11,14 @@ namespace PuzzleSolver.Core
 	{
 		private MargePoly margePoly;                    //実体. 多角形マージ用の関数を集めた.
 		public List<Puzzle> ViewPuzzles { get; }        //ViewPuzzles.Count … 何手まで調べたか(最初も含む)、ViewPuzzles[i] … i手目の結果
+		public List<List<int>> evalScores { get; }		//評価値, デバッグ用
 
 		//コンストラクタ
 		public Solver()
 		{
 			margePoly = new MargePoly();
 			ViewPuzzles = new List<Puzzle>();
+			evalScores = new List<List<int>>();
 		}
 
 
@@ -24,13 +26,16 @@ namespace PuzzleSolver.Core
 		public void Solve(Puzzle initialPuzzle)
 		{
 			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 500;
+			int beamWidth = 1000;
 			int nowDepth = 0;
 			int maxDepth = initialPuzzle.initPieceNum;
 
-			for (int i = 0; i < 100; i++) { States.Add(new SkewHeap()); }
+			for (int i = 0; i <= maxDepth; i++) { States.Add(new SkewHeap()); }
 			States[0].Push(initialPuzzle);
 			ViewPuzzles.Add(initialPuzzle); //0手目の結果
+
+			for (int i = 0; i <= maxDepth; i++) { evalScores.Add(new List<int>()); }
+			evalScores[0].Add(initialPuzzle.boardScore);
 
 			//パズルを解く (1手進める) → ビームサーチ
 			while (nowDepth < maxDepth)
@@ -45,6 +50,15 @@ namespace PuzzleSolver.Core
 				}
 				if (States[nowDepth + 1].Count > 0) { ViewPuzzles.Add(States[nowDepth + 1].MaxValue().Clone()); nowDepth++; }
 				else { break; }
+
+				//デバッグ
+				SkewHeap sh = States[nowDepth].CloneShallow();
+				while (sh.Count > 0)
+				{
+					evalScores[nowDepth].Add(sh.MinValue().boardScore);
+					sh.Pop();
+				}
+				evalScores[nowDepth].Reverse();
 			}
 		}
 

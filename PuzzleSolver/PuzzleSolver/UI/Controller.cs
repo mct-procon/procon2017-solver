@@ -91,6 +91,10 @@ namespace PuzzleSolver.UI
 				{
 					view.DrawPieceStrong(ViewPuzzle, strongDrawPieceId, false);
 				}
+
+				//デバッグとして評価値を表示する
+				List<int> scores = solve.evalScores[cursor];
+				DX.DrawString(100, 100, 0, scores.Count.ToString());
 			}
 		}
 

@@ -27,8 +27,9 @@ namespace PuzzleSolver.Core
 			for (int i = 0; i < QRCode.Frames.Count; i++)
 			{
 				Poly poly = Poly.ParsePolyFromQRCode(QRCode.Frames[i], false, -1);
-				poly.UpdateMinestPointId();
-				wakus.Add(poly);
+				Poly TransformedPoly = RotateTurnWaku(poly);
+				TransformedPoly.UpdateMinestPointId();
+				wakus.Add(TransformedPoly);
 			}
 
 			//ピース
@@ -83,9 +84,12 @@ namespace PuzzleSolver.Core
 
 				//時計回りの頂点列にする
 				if (poly.Area > 0) { poly.points.Reverse(); }
-				poly.UpdateMinestPointId();
 
-				wakus.Add(poly);
+				//解きやすいように、90°回転, ターン
+				Poly TransformedPoly = RotateTurnWaku(poly);
+				TransformedPoly.UpdateMinestPointId();
+
+				wakus.Add(TransformedPoly);
 			}
 
 			//ピース
@@ -126,6 +130,76 @@ namespace PuzzleSolver.Core
 			ReadLog.Close();
 
 			return puzzle;
+		}
+
+		//ヒント(長方形以外の頂点）と左上の頂点の距離の最小値が、最小になるように、枠を(90°単位の回転, 反転)をする。
+		//枠が長方形だったらそのまま返す。
+		private Poly RotateTurnWaku(Poly poly)
+		{
+			double retDist = 1145141919;
+			double retDistX = 1145141919;
+			Poly ret = null;
+
+			for (int turnflag = 0; turnflag <= 1; turnflag++)
+			{
+				for (int dir = 0; dir < 4; dir++)
+				{
+					Poly TransformedPoly = poly.Clone();
+
+					if (turnflag == 1)
+					{
+						TransformedPoly.Turn(true);
+					}
+					Point mul = new Point(1, 0);
+					if (dir == 0) { mul = new Point(1, 0); }
+					if (dir == 1) { mul = new Point(0, 1); }
+					if (dir == 2) { mul = new Point(-1, 0); }
+					if (dir == 3) { mul = new Point(0, -1); }
+					TransformedPoly.Mul(mul, true);
+
+					List<Point> points = TransformedPoly.points;
+					int i;
+					double minX = points[0].Re;
+					double maxX = points[0].Re;
+					double minY = points[0].Im;
+					double maxY = points[0].Im;
+
+					for (i = 0; i < points.Count; i++)
+					{
+						minX = Math.Min(minX, points[i].Re);
+						maxX = Math.Max(maxX, points[i].Re);
+						minY = Math.Min(minY, points[i].Im);
+						maxY = Math.Max(maxY, points[i].Im);
+					}
+
+					double minDist = 1145141919;
+					double minDistX = 1145141919;
+					for (i = 0; i < points.Count; i++)
+					{
+						if (points[i].Re != minX && points[i].Re != maxX && points[i].Im != minY && points[i].Im != maxY)
+						{
+							double dist = (new Point(minX, minY) - points[i]).Norm;
+							if (minDist > dist)
+							{
+								minDist = dist;
+								minDistX = points[i].Re;
+							}
+						}
+					}
+					if (minDist == 1145141919)
+					{
+						return poly;	//長方形の場合は、そのまま返す
+					}
+
+					if (retDist > minDist || (retDist == minDist && retDistX > minDistX))
+					{
+						retDist = minDist;
+						retDistX = minDistX;
+						ret = TransformedPoly;
+					}
+				}
+			}
+			return ret;
 		}
 
 		//多角形を読み込んで返す. エラー時はnullを返す.
