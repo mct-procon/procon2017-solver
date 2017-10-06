@@ -33,10 +33,11 @@ namespace PuzzleSolver
         {
 			DX.SetDoubleStartValidFlag(1);
 
+			DX.SetMainWindowText("BeamSearch");
 			DX.ChangeWindowMode(true);                        // Set Window Mode against FullScreen Mode.
             DX.SetBackgroundColor(255, 255, 255);             // Set Background Color of Screen.
             DX.SetWindowSizeChangeEnableFlag(true, false);    // Set Resizable and non-Scaling.
-            DX.SetWindowSize(1400, 1000);                       // Set Window Size
+            DX.SetWindowSize(1400, 1000);                     // Set Window Size
             DX.SetAlwaysRunFlag(true);                        // Set to run even when the window is not active.
             DX.SetGraphMode(1920, 1080, 32);                  // Set Main Render's Size.
             if (DX.Init() == DX.Result.Error) Environment.Exit(-1);
@@ -65,7 +66,9 @@ namespace PuzzleSolver
 
 			Puzzle initialPuzzle;
 			//initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\13piece_1.txt");
-			while (!Network.ProconPuzzleService.IsQrCodeReceived) ;
+			while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape)) {
+				if (Network.ProconPuzzleService.IsQrCodeReceived) { break; }
+			}
 			initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
 			if (initialPuzzle == null) { DX.Finalize(); return; }
 
