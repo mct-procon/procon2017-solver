@@ -47,7 +47,7 @@ namespace PuzzleSolver
             MainWindow = NativeWindow.FromHandle(MainWindowHWND);
 
             read = new Read();
-            controller = new Controller(new Point(0, 0), 5.0, 1400, 1000);
+            controller = new Controller(new Point(-50, -30), 9.20, 1400, 1000);
 
             DX.ClsDx();
 
@@ -65,7 +65,7 @@ namespace PuzzleSolver
             }
 
 			Puzzle initialPuzzle;
-			//initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\13piece_1.txt");
+			//initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\ProconSample\qrresult.txt");
 			while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape)) {
 				if (Network.ProconPuzzleService.IsQrCodeReceived) { break; }
 			}
