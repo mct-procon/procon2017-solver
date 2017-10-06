@@ -67,7 +67,7 @@ namespace PuzzleSolver
 			}
 
 			Puzzle initialPuzzle;
-			initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\49triangles.txt");
+			initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\13piece_1.txt");
 			//while (!Network.ProconPuzzleService.IsQrCodeReceived) ;
 			//initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
 			if (initialPuzzle == null) { DX.Finalize(); return; }
