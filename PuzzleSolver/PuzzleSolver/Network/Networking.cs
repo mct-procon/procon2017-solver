@@ -8,6 +8,7 @@ using Procon2017MCTProtocol;
 
 namespace PuzzleSolver.Network {
     public class WCF {
+<<<<<<< HEAD
         IProconPuzzleService proconService;
         ProconPuzzleService Receiver;
 
@@ -21,16 +22,21 @@ namespace PuzzleSolver.Network {
             factory.Endpoint.Address = new EndpointAddress(Parameter.ProconPuzzUri.AbsoluteUri);
 
             proconService = factory.CreateChannel();
+=======
+        ServiceHost svc = new ServiceHost(typeof(ProconPuzzleService));
+        public void Open() {
+            svc.AddServiceEndpoint(typeof(IProconPuzzleService), new BasicHttpBinding(), Parameter.ProconPuzzUri);
+            svc.Open();
+>>>>>>> parent of 07e90da... Updated Networking. not tested yet! : )
         }
 
-        public class Dummy : IProconPuzzleService
-        {
-            public void Polygon(SendablePolygon poly) { }
-            public void QRCode(QRCodeData data) { }
+        public void Close() {
+            if(svc.State == CommunicationState.Opened)
+                svc.Close();
         }
     }
 
-    public class ProconPuzzleService : Procon2017MCTProtocol.IDuplexCallback {
+    public class ProconPuzzleService : IProconPuzzleService {
         public static volatile bool IsPolygonReceived = false;
         static SendablePolygon _Polygon;
         public static SendablePolygon Polygon {
@@ -58,7 +64,7 @@ namespace PuzzleSolver.Network {
         }
 
 
-        void IDuplexCallback.Polygon(SendablePolygon poly) {
+        void IProconPuzzleService.Polygon(SendablePolygon poly) {
             if(_Polygon == null) 
                 _Polygon = poly;
             else {
@@ -69,7 +75,7 @@ namespace PuzzleSolver.Network {
             IsPolygonReceived = true;
         }
 
-        void IDuplexCallback.QRCode(QRCodeData data) {
+        void IProconPuzzleService.QRCode(QRCodeData data) {
             if(_QrCode == null)
                 _QrCode = data;
             else {
