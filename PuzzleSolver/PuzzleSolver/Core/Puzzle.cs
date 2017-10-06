@@ -19,15 +19,20 @@ namespace PuzzleSolver.Core
 		public int boardScore { get; private set; }		//盤面スコア.
 		public long boardHash { get; private set; }     //盤面ハッシュ値. (枠穴の)頂点列に使われている線分の集合とハッシュ値を対応させている。
 
+		public bool wakuInitialTurnFlag { get; }    //枠穴を最初に反転させたか
+		public Point wakuInitialMul { get; }		//枠穴を最初どのくらい回転させたか (回転の中心は, 原点）（90°単位の回転なので、元の枠の点が整数座標なら、必ず整数座標に移る！！）
+
         //コンストラクタ
         public Puzzle() { }
-        public Puzzle(List<Poly> wakus, List<Line> wakuLines, List<List<Poly>> pieceTable, List<bool> isPieceExist, int initPieceNum)
+        public Puzzle(List<Poly> wakus, List<Line> wakuLines, List<List<Poly>> pieceTable, List<bool> isPieceExist, int initPieceNum, bool wakuInitialTurnFlag, Point wakuInitialMul)
         {
             this.wakus = wakus;
 			this.wakuLines = wakuLines;
 			this.pieceTable = pieceTable;
 			this.isPieceExist = isPieceExist;
 			this.initPieceNum = initPieceNum;
+			this.wakuInitialTurnFlag = wakuInitialTurnFlag;
+			this.wakuInitialMul = wakuInitialMul;
         }
 
 		//isPieceExistの更新. Solverクラスの多角形マージでのみ使用
@@ -52,7 +57,7 @@ namespace PuzzleSolver.Core
         //evalNoteはまだ使っていないので, コピーしていません）
         public Puzzle Clone()
         {
-			Puzzle ret = new Puzzle(new List<Poly>(this.wakus), new List<Line>(this.wakuLines), this.pieceTable, new List<bool>(this.isPieceExist), this.initPieceNum);
+			Puzzle ret = new Puzzle(new List<Poly>(this.wakus), new List<Line>(this.wakuLines), this.pieceTable, new List<bool>(this.isPieceExist), this.initPieceNum, this.wakuInitialTurnFlag, this.wakuInitialMul);
 			for (int i = 0; i < ret.wakus.Count; i++) { ret.wakus[i] = ret.wakus[i].Clone(); }
 			for (int i = 0; i < ret.wakuLines.Count; i++) { ret.wakuLines[i] = ret.wakuLines[i].Clone(); }
 			ret.boardScore = this.boardScore;

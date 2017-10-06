@@ -22,12 +22,17 @@ namespace PuzzleSolver.Core
 			List<Poly> wakus = new List<Poly>();
 			List<Line> wakuLines = new List<Line>();
 			List<List<Poly>> pieceTable = new List<List<Poly>>();
+			bool wakuInitialTurnFlag = false;
+			Point wakuInitialMul = new Point(1, 0);
 
 			//枠
 			for (int i = 0; i < QRCode.Frames.Count; i++)
 			{
 				Poly poly = Poly.ParsePolyFromQRCode(QRCode.Frames[i], false, -1);
-				Poly TransformedPoly = RotateTurnWaku(poly);
+				Tuple<bool, Point, Poly> res = RotateTurnWaku(poly);
+				wakuInitialTurnFlag = res.Item1;
+				wakuInitialMul = res.Item2;
+				Poly TransformedPoly = res.Item3;
 				TransformedPoly.UpdateMinestPointId();
 				wakus.Add(TransformedPoly);
 			}
@@ -51,7 +56,7 @@ namespace PuzzleSolver.Core
 			List<bool> isPieceExist = new List<bool>();
 			for (int i = 0; i < pieceTable.Count; i++) { isPieceExist.Add(true); }
 
-			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, isPieceExist, pieceTable.Count);
+			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, isPieceExist, pieceTable.Count, wakuInitialTurnFlag, wakuInitialMul);
 
 			//盤面評価値, 盤面ハッシュ
 			puzzle.setBoardScore(0);
@@ -72,7 +77,9 @@ namespace PuzzleSolver.Core
 			List<Poly> wakus = new List<Poly>();
 			List<Line> wakuLines = new List<Line>();
 			List<List<Poly>> pieceTable = new List<List<Poly>>();
-			
+			bool wakuInitialTurnFlag = false;
+			Point wakuInitialMul = new Point(1, 0);
+
 			//枠
 			s = ReadLine(reader);
 			if (s == null) { return null; }
@@ -86,7 +93,10 @@ namespace PuzzleSolver.Core
 				if (poly.Area > 0) { poly.points.Reverse(); }
 
 				//解きやすいように、90°回転, ターン
-				Poly TransformedPoly = RotateTurnWaku(poly);
+				Tuple<bool, Point, Poly> res = RotateTurnWaku(poly);
+				wakuInitialTurnFlag = res.Item1;
+				wakuInitialMul = res.Item2;
+				Poly TransformedPoly = res.Item3;
 				TransformedPoly.UpdateMinestPointId();
 
 				wakus.Add(TransformedPoly);
@@ -121,7 +131,7 @@ namespace PuzzleSolver.Core
 			List<bool> isPieceExist = new List<bool>();
 			for (int i = 0; i < pieceTable.Count; i++) { isPieceExist.Add(true); }
 
-			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, isPieceExist, pieceTable.Count);
+			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, isPieceExist, pieceTable.Count, wakuInitialTurnFlag, wakuInitialMul);
 
 			//盤面評価値, 盤面ハッシュ
 			puzzle.setBoardScore(0);
@@ -132,13 +142,16 @@ namespace PuzzleSolver.Core
 			return puzzle;
 		}
 
-		//ヒント(長方形以外の頂点）と左上の頂点の距離の最小値が、最小になるように、枠を(90°単位の回転, 反転)をする。
+		//ヒント(長方形以外の頂点）の「(x座標) - minX」の最小値が最小になるように、枠を(90°単位の回転, 反転)をする。
 		//枠が長方形だったらそのまま返す。
-		private Poly RotateTurnWaku(Poly poly)
+		//返り値：(isTurn, Mul, returnPoly)
+		private Tuple<bool, Point, Poly> RotateTurnWaku(Poly poly)
 		{
-			double retDist = 1145141919;
-			double retDistX = 1145141919;
+			double retDiffX = 1145141919;
+			double retDiffY = 1145141919;
 			Poly ret = null;
+			bool retTurnflag = false;
+			Point retMul = new Point(1, 0);
 
 			for (int turnflag = 0; turnflag <= 1; turnflag++)
 			{
@@ -172,34 +185,35 @@ namespace PuzzleSolver.Core
 						maxY = Math.Max(maxY, points[i].Im);
 					}
 
-					double minDist = 1145141919;
-					double minDistX = 1145141919;
+					double minDiffX = 1145141919;
+					double minDiffY = 1145141919;
 					for (i = 0; i < points.Count; i++)
 					{
 						if (points[i].Re != minX && points[i].Re != maxX && points[i].Im != minY && points[i].Im != maxY)
 						{
-							double dist = (new Point(minX, minY) - points[i]).Norm;
-							if (minDist > dist)
+							if ((minDiffX > points[i].Re - minX) || (minDiffX == points[i].Re - minX && minDiffY > points[i].Im - minY))
 							{
-								minDist = dist;
-								minDistX = points[i].Re;
+								minDiffX = points[i].Re - minX;
+								minDiffY = points[i].Im - minY;
 							}
 						}
 					}
-					if (minDist == 1145141919)
+					if (minDiffX == 1145141919)
 					{
-						return poly;	//長方形の場合は、そのまま返す
+						return new Tuple<bool, Point, Poly>(false, new Point(1, 0), poly);	//長方形の場合は、そのまま返す
 					}
 
-					if (retDist > minDist || (retDist == minDist && retDistX > minDistX))
+					if (retDiffX > minDiffX || (retDiffX == minDiffX && retDiffY > minDiffY))
 					{
-						retDist = minDist;
-						retDistX = minDistX;
+						retDiffX = minDiffX;
+						retDiffY = minDiffY;
 						ret = TransformedPoly;
+						retTurnflag = (turnflag == 1);
+						retMul = mul;
 					}
 				}
 			}
-			return ret;
+			return new Tuple<bool, Point, Poly>(retTurnflag, retMul, ret);
 		}
 
 		//多角形を読み込んで返す. エラー時はnullを返す.

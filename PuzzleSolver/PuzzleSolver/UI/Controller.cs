@@ -75,6 +75,10 @@ namespace PuzzleSolver.UI
 
 				//表示したいパズルを渡す
 				Puzzle ViewPuzzle = solve.ViewPuzzles[cursor].Clone();
+
+				//最初の, 枠穴の反転, 回転を打ち消す変換をする。
+				revertInitialWakuTransform(ViewPuzzle);
+
 				if (Network.ProconPuzzleService.IsPolygonReceived)
 				{
 					//支援システムから、Webカメラに写った多角形を読み取る。もし読み取れて、かつ、該当する多角形が存在すればViewクラスで表示。
@@ -98,6 +102,30 @@ namespace PuzzleSolver.UI
 			}
 		}
 
+		//最初の枠穴の反転, 回転を打ち消す変換をする。(表示用データの生成. 計算には用いない！）
+		//枠穴と枠線の変換をすればよい。
+		void revertInitialWakuTransform(Puzzle puzzle)
+		{
+			bool TurnFlag = puzzle.wakuInitialTurnFlag;
+			Point Mul = puzzle.wakuInitialMul;
+			Mul = new Point(1, 0) / Mul;
+
+			for (int i = 0; i < puzzle.wakus.Count; i++)
+			{
+				if (!puzzle.wakus[i].isExist) { continue; }
+
+				//変換
+				puzzle.wakus[i].Mul(Mul, true);
+				if (TurnFlag) { puzzle.wakus[i].Turn(true); }
+				puzzle.wakus[i].UpdateMinestPointId();
+			}
+
+			for (int i = 0; i < puzzle.wakuLines.Count; i++)
+			{
+				puzzle.wakuLines[i].Mul(Mul);
+				if (TurnFlag) { puzzle.wakuLines[i].Turn(); }
+			}
+		}
 
 		//引数：表示するPuzzle, 支援システムから受け取った多角形
 		//戻り値：強調表示すべきピースの番号. 該当するものがなければ-1を返す.
