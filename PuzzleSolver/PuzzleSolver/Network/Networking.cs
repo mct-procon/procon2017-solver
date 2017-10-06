@@ -10,7 +10,7 @@ namespace PuzzleSolver.Network {
     public class WCF {
         ServiceHost svc = new ServiceHost(typeof(ProconPuzzleService));
         public void Open() {
-            svc.AddServiceEndpoint(typeof(IProconPuzzleService), new BasicHttpBinding(), Parameter.ProconPuzzUri);
+            svc.AddServiceEndpoint(typeof(IProconPuzzleService), new BasicHttpBinding(), Parameter.ProconPuzzUri[0]);
             svc.Open();
         }
 
