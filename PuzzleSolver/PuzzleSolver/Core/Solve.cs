@@ -7,6 +7,11 @@ using PuzzleSolver.Geometry;
 
 namespace PuzzleSolver.Core
 {
+	public enum SolverMode {
+		Nantyatte,		//多角形番号の規則性が必要だが、とても強い
+		Gachi			//多角形番号の規則性がいらないけど、あんまり強くない
+	}
+	
 	public class Solver
 	{
 		private MargePoly margePoly;                    //実体. 多角形マージ用の関数を集めた.
@@ -24,11 +29,11 @@ namespace PuzzleSolver.Core
 		public void Solve(Puzzle initialPuzzle)
 		{
 			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 50;
+			int beamWidth = 500;
 			int nowDepth = 0;
 			int maxDepth = initialPuzzle.initPieceNum;
 
-			for (int i = 0; i < 100; i++) { States.Add(new SkewHeap()); }
+			for (int i = 0; i < maxDepth + 1; i++) { States.Add(new SkewHeap()); }
 			States[0].Push(initialPuzzle);
 			ViewPuzzles.Add(initialPuzzle); //0手目の結果
 
@@ -128,12 +133,12 @@ namespace PuzzleSolver.Core
 		//結合度を得る
 		private int GetScore(Poly dstPoly, Poly srcPoly, int bestScore)
 		{
-			List<Point> backupPointList = new List<Point>(srcPoly.points);
-			move(dstPoly, srcPoly, false);
-			int score = Poly.Evaluation(dstPoly, srcPoly, dstPoly.minestPointId, srcPoly.minestPointId);
-			if (score < bestScore || srcPoly.isHitLine(dstPoly)) { score = -1; }
+			Poly clonedSrcPoly = srcPoly.Clone();
+			move(dstPoly, clonedSrcPoly, false);
+			int score = Poly.Evaluation(dstPoly, clonedSrcPoly, dstPoly.minestPointId, clonedSrcPoly.minestPointId);
+			if (score < bestScore || clonedSrcPoly.isHitLine(dstPoly)) { score = -1; }
 
-			List<Point> points = srcPoly.SizingPoly();
+			List<Point> points = clonedSrcPoly.SizingPoly();
 			for (int i = 0; i < points.Count; i++)
 			{
 				if (!dstPoly.isCover(points[i]))
@@ -143,7 +148,6 @@ namespace PuzzleSolver.Core
 				}
 			}
 
-			srcPoly.points = backupPointList;
 			return score;
 		}
 
