@@ -31,6 +31,8 @@ namespace PuzzleSolver
 		[STAThread]
 		static void Main(string[] args)
 		{
+			DX.SetDoubleStartValidFlag(1);
+
 			DX.ChangeWindowMode(true);                        // Set Window Mode against FullScreen Mode.
 			DX.SetBackgroundColor(255, 255, 255);             // Set Background Color of Screen.
 			DX.SetWindowSizeChangeEnableFlag(1, false);    // Set Resizable and non-Scaling.
