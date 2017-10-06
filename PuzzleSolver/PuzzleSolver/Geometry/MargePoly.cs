@@ -41,39 +41,27 @@ namespace PuzzleSolver.Geometry
 				for (int i = 0; i < srcPoly.lines.Count; i++) { lines.Add(srcPoly.lines[i].Clone()); }
 			}
 
-			for (int i = 0; i < pointList.Count; i++)
+			while (true)
 			{
-				for (int j = 0; j < edgeTo[i].Count; j++)
+				int i;
+				for (i = 0; i < pointList.Count; i++)
 				{
-					if (used[i][j]) { continue; }
-					polys.AddRange(getPolys(i, j, dstPoly.isPiece, lines));
+					if (edgeTo[i].Count != 1) { continue; }
+					if (!used[i][0]) { break; }
 				}
+				if (i == pointList.Count) { break; }    //non exist
+				polys.AddRange(getPolys(i, 0, false, lines));
 			}
 
 			//エラー処理
 			if (dstPoly.isPiece && polys.Count > 1) { return new List<Poly>(); }	//2ピースの内部に穴があるケース
-			if (!dstPoly.isPiece && polys.Count == 0) { polys.Add(new Poly(new List<Point>(), lines, false)); return polys; }	//枠穴に完全にピースが収まったケース
+			if (!dstPoly.isPiece && polys.Count == 0) { polys.Add(new Poly(new List<Point>(), lines, false)); return polys; }   //枠穴に完全にピースが収まったケース
 
 			//冗長点削除 + 辺生成
 			List<Poly> ret = new List<Poly>();
 			for (int i = 0; i < polys.Count; i++)
 			{
 				ret.Add(fixPoly(polys[i].points, lines, polys[i].isPiece));
-			}
-
-			//枠とピースが頂点で接していて, 枠が単純多角形ではなくなるケースの処理
-			if (!dstPoly.isPiece && ret.Count == 2)
-			{
-				double area = 0;
-				for (int i = 0; i < 2; i++)
-				{
-					area += Math.Abs(ret[i].Area);
-				}
-				if (area > -dstPoly.Area)
-				{
-					//頂点列の結合をして, 1つの枠穴として返す.
-					ret = MargeTwoWaku(ret);
-				}
 			}
 			return ret;
 		}
@@ -118,12 +106,14 @@ namespace PuzzleSolver.Geometry
 			}
 		}
 	
-		//サイクルを検出して多角形を作る
+		//サイクルを検出して多角形を作る (冗長点削除はしない)
 		private List<Poly> getPolys(int startPointId, int startEdgeId, bool isPiece, List<Line> lines)
 		{
 			List<int> cycle = getCycle(startPointId, startEdgeId, isPiece);
-			List<List<int>> cycles = BreakDownCycle(cycle);
+			List<List<int>> cycles = new List<List<int>>();
 			List<Poly> ret = new List<Poly>();
+
+			cycles.Add(cycle);
 
 			for (int i = 0; i < cycles.Count; i++)
 			{
@@ -133,7 +123,7 @@ namespace PuzzleSolver.Geometry
 					points.Add(pointList[cycles[i][j]]);
 				}
 
-				ret.Add(fixPoly(points, lines, isPiece));
+				ret.Add(new Poly(points, lines, isPiece));
 			}
 			return ret;
 		}
@@ -249,7 +239,6 @@ namespace PuzzleSolver.Geometry
 			double minArg = 114514;
 			int ret = -1;
 			Point a = pointList[prevPos] - pointList[pos];
-			a /= a.Abs;
 
 			for (i = 0; i < edgeTo[pos].Count; i++)
 			{
@@ -258,82 +247,12 @@ namespace PuzzleSolver.Geometry
 				int nextPos = edgeTo[pos][i];
 
 				Point b = pointList[nextPos] - pointList[pos];
-				b /= b.Abs;
 
 				double arg = (b / a).Arg;
 				if (arg < 0) { arg += 2 * PAI; }
 				if (minArg > arg) { minArg = arg; ret = i; }
 			}
 
-			return ret;
-		}
-
-		//1頂点で接している2つの枠穴を, 1つの枠穴にする。（接している頂点を起点として、頂点列をマージ）.
-		//使用時の前提：2つの枠穴の頂点列の向きは異なる向きになっている。
-		List<Poly> MargeTwoWaku(List<Poly> wakus)
-		{
-			if (wakus[0].Area > 0)
-			{
-				Poly t = wakus[0];
-				wakus[0] = wakus[1];
-				wakus[1] = t;
-			}
-
-			Dictionary<Point, int> Counts = new Dictionary<Point, int>();
-			int i, j, k;
-
-			for (i = 0; i < wakus.Count; i++)
-			{
-				for (j = 0; j < wakus[i].Count; j++)
-				{
-					if (!Counts.ContainsKey(wakus[i][j]))
-					{
-						Counts[wakus[i][j]] = 0;
-					}
-					Counts[wakus[i][j]]++;
-				}
-			}
-
-			if (!Counts.ContainsValue(2)) { throw new Exception("共通の頂点が見つかりません。"); }
-
-			Point p = new Point(0, 0);
-			foreach (KeyValuePair<Point, int> item in Counts)
-			{
-				if (item.Value == 2)
-				{
-					p = item.Key;
-					break;
-				}
-			}
-
-			List<Point> points = new List<Point>();
-			for (i = 0; i < wakus.Count; i++)
-			{
-				for (j = 0; j < wakus[i].Count; j++)
-				{
-					if (Point.Compare(wakus[i][j], p) == 0)
-					{
-						break;
-					}
-				}
-
-				for (k = 0; k < wakus[i].Count; k++)
-				{
-					points.Add(wakus[i][k + j]);
-				}
-			}
-			points.Add(points[0]);
-
-			Poly poly = new Poly(points, new List<Line>(), false);
-
-			if (poly.Area > 0)
-			{
-				poly.points.Reverse();
-			}
-			poly.UpdateMinestPointId();
-
-			List<Poly> ret = new List<Poly>();
-			ret.Add(poly);
 			return ret;
 		}
 	}
