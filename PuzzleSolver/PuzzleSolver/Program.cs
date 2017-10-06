@@ -31,8 +31,8 @@ namespace PuzzleSolver
 		[STAThread]
 		static void Main(string[] args)
 		{
+			DX.SetMainWindowText("Gatiyatte");
 			DX.SetDoubleStartValidFlag(1);
-
 			DX.ChangeWindowMode(true);                        // Set Window Mode against FullScreen Mode.
 			DX.SetBackgroundColor(255, 255, 255);             // Set Background Color of Screen.
 			DX.SetWindowSizeChangeEnableFlag(1, false);    // Set Resizable and non-Scaling.
@@ -46,7 +46,7 @@ namespace PuzzleSolver
 			MainWindow = NativeWindow.FromHandle(MainWindowHWND);
 
 			read = new Read();
-			controller = new Controller(new Point(0, 0), 5.0, 1400, 1000);
+			controller = new Controller(new Point(-50, -30), 9.20, 1400, 1000);
 
 			DX.ClsDx();
 
@@ -68,10 +68,16 @@ namespace PuzzleSolver
 #endif
 			}
 
-			Puzzle initialPuzzle;
+			Puzzle initialPuzzle = null;
 			//initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\27piece_1.txt");
-			while (!Network.ProconPuzzleService.IsQrCodeReceived) ;
-			initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
+			while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape))
+			{
+				if (Network.ProconPuzzleService.IsQrCodeReceived) { break; }
+			}
+			if (Network.ProconPuzzleService.IsQrCodeReceived)
+			{
+				initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
+			}
 			if (initialPuzzle == null) { DX.Finalize(); return; }
 
 			controller.Syakunetsukun(initialPuzzle);
