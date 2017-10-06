@@ -16,6 +16,51 @@ namespace PuzzleSolver.Core
 		//コンストラクタ
 		public Read() { }
 		
+		//QRコードから読み取ったデータをPuzzle型に変換する.
+		public Puzzle ReadFromQRCode(Procon2017MCTProtocol.QRCodeData QRCode)
+		{
+			List<Poly> wakus = new List<Poly>();
+			List<Line> wakuLines = new List<Line>();
+			List<List<Poly>> pieceTable = new List<List<Poly>>();
+
+			//枠
+			for (int i = 0; i < QRCode.Frames.Count; i++)
+			{
+				Poly poly = Poly.ParsePolyFromQRCode(QRCode.Frames[i], false, -1);
+				poly.UpdateMinestPointId();
+				wakus.Add(poly);
+			}
+
+			//ピース
+			for (int i = 0; i < QRCode.Polygons.Count; i++)
+			{
+				Poly piece = Poly.ParsePolyFromQRCode(QRCode.Polygons[i], true, (sbyte)i);
+				pieceTable.Add(GetPieceList(piece));
+			}
+
+			//枠辺
+			for (int i = 0; i < wakus.Count; i++)
+			{
+				for (int j = 0; j < wakus[i].Count; j++)
+				{
+					wakuLines.Add(new Line(wakus[i].points[j], wakus[i].points[j + 1], -1));
+				}
+			}
+
+			List<bool> isPieceExist = new List<bool>();
+			for (int i = 0; i < pieceTable.Count; i++) { isPieceExist.Add(true); }
+
+			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, isPieceExist, pieceTable.Count);
+
+			//盤面評価値, 盤面ハッシュ
+			puzzle.setBoardScore(0);
+			puzzle.setBoardHash();
+			ReadLog.Close();
+
+			return puzzle;
+		}
+
+
 		//ファイルからパズルを読み込んで返す。
 		public Puzzle ReadFile(string fileName)
 		{
