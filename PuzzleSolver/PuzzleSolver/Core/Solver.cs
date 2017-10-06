@@ -10,13 +10,11 @@ namespace PuzzleSolver.Core
 {
 	public class Solver
 	{
-		private MargePoly margePoly;					//実体. 多角形マージ用の関数を集めた.
 		public List<Puzzle> ViewPuzzles { get; }		//ViewPuzzles.Count … 何手まで調べたか(最初も含む)、ViewPuzzles[i] … i手目の結果
 
 		//コンストラクタ
 		public Solver()
 		{
-			margePoly = new MargePoly();
 			ViewPuzzles = new List<Puzzle>();
 		}
 
@@ -59,6 +57,7 @@ namespace PuzzleSolver.Core
 			{
 				Poly dstPoly = polys[dstPolyId];
 				if (!dstPoly.isExist) { continue; }
+
 				for (int srcPolyId = 0; srcPolyId < puzzle.pieces.Count; srcPolyId++)
 				{
 					Poly srcPoly = puzzle.pieces[srcPolyId];
@@ -114,12 +113,11 @@ namespace PuzzleSolver.Core
 		//結合度を得る
 		private int getScore(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId, int direction, bool turnflag, int bestScore)
 		{
-			List<Point> backupPointList = new List<Point>(srcPoly.points);
-			if (turnflag) { srcPoly.Turn(false); }
-			move(dstPoly, srcPoly, dstPointId, srcPointId, direction);
-			int score = Poly.Evaluation(dstPoly, srcPoly, dstPointId, srcPointId);
-			if (score < bestScore || dstPoly.isHitLine(srcPoly)) { score = -1; }
-			srcPoly.points = backupPointList;
+			Poly clonedSrcPoly = new Poly(new List<Point>(srcPoly.points), null, true);
+			if (turnflag) { clonedSrcPoly.Turn(false); }
+			move(dstPoly, clonedSrcPoly, dstPointId, srcPointId, direction);
+			int score = Poly.Evaluation(dstPoly, clonedSrcPoly, dstPointId, srcPointId);
+			if (score < bestScore || dstPoly.isHitLine(clonedSrcPoly)) { score = -1; }
 			return score;
 		}
 
@@ -155,6 +153,7 @@ namespace PuzzleSolver.Core
 			move(dstPoly, srcPoly, dstPointId, srcPointId, direction, true);
 
 			//マージ判定
+			MargePoly margePoly = new MargePoly();
 			List<Poly> polys = margePoly.Marge(dstPoly, srcPoly);
 			if (polys.Count == 0) { return null; }
 
