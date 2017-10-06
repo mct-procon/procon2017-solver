@@ -15,10 +15,8 @@ namespace PuzzleSolver.Network {
         {
             Receiver = new ProconPuzzleService();
 
-            BasicHttpBinding binding = new BasicHttpBinding();
-
             DuplexChannelFactory<IProconPuzzleService> factory = new DuplexChannelFactory<IProconPuzzleService>(proconService);
-            factory.Endpoint.Binding = new BasicHttpBinding();
+            factory.Endpoint.Binding = new WSDualHttpBinding();
             factory.Endpoint.Contract.ContractType = typeof(IProconPuzzleService);
             factory.Endpoint.Address = new EndpointAddress(Parameter.ProconPuzzUri.AbsoluteUri);
 
