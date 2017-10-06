@@ -9,14 +9,12 @@ namespace PuzzleSolver.Core
 {
 	public class Solver
 	{
-		private MargePoly margePoly;                    //実体. 多角形マージ用の関数を集めた.
 		public List<Puzzle> ViewPuzzles { get; }        //ViewPuzzles.Count … 何手まで調べたか(最初も含む)、ViewPuzzles[i] … i手目の結果
 		public List<List<int>> evalScores { get; }		//評価値, デバッグ用
 
 		//コンストラクタ
 		public Solver()
 		{
-			margePoly = new MargePoly();
 			ViewPuzzles = new List<Puzzle>();
 			evalScores = new List<List<int>>();
 		}
@@ -69,23 +67,23 @@ namespace PuzzleSolver.Core
 			int wakuId = GetDistinationWakuId(puzzle.wakus);
 			if (wakuId < 0) { return; }
 
-			for (int srcPolyId = 0; srcPolyId < puzzle.pieceTable.Count; srcPolyId++)
-			{
-				if (!puzzle.isPieceExist[srcPolyId]) { continue; }
-				List<Poly> srcPolys = puzzle.pieceTable[srcPolyId];
+			Parallel.For(0, puzzle.pieceTable.Count, srcPolyId =>
+		   {
+			   if (!puzzle.isPieceExist[srcPolyId]) { return; }
+			   List<Poly> srcPolys = puzzle.pieceTable[srcPolyId];
 
-				Poly dstPoly = puzzle.wakus[wakuId];
-				for (int i = 0; i < srcPolys.Count; i++)
-				{
-					int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);
-					if (score < 0) { continue; }
-					Puzzle nextPuzzle = GetNextPuzzle(puzzle, wakuId, srcPolyId, i, score);
-					if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
-					{
-						UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
-					}
-				}
-			}
+			   Poly dstPoly = puzzle.wakus[wakuId];
+			   for (int i = 0; i < srcPolys.Count; i++)
+			   {
+				   int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);
+				   if (score < 0) { continue; }
+				   Puzzle nextPuzzle = GetNextPuzzle(puzzle, wakuId, srcPolyId, i, score);
+				   if (IsUpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth))
+				   {
+						lock(heap) lock (puzzlesInHeap) UpdateBeam(heap, puzzlesInHeap, nextPuzzle, beamWidth);
+				   }
+			   }
+		   });
 		}
 
 		//dstination頂点の属する可能性のある枠の番号を1つ返す. dstination頂点 = 枠Xの頂点番号Yのとき, Xを返す.
@@ -170,6 +168,7 @@ namespace PuzzleSolver.Core
 			move(dstPoly, srcPoly, true);
 
 			//マージ判定
+			MargePoly margePoly = new MargePoly();
 			List<Poly> polys = margePoly.Marge(dstPoly, srcPoly);
 			if (polys.Count == 0) { return null; }
 
