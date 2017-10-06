@@ -31,7 +31,9 @@ namespace PuzzleSolver
         [STAThread]
         static void Main(string[] args)
         {
-            DX.ChangeWindowMode(true);                        // Set Window Mode against FullScreen Mode.
+			DX.SetDoubleStartValidFlag(1);
+
+			DX.ChangeWindowMode(true);                        // Set Window Mode against FullScreen Mode.
             DX.SetBackgroundColor(255, 255, 255);             // Set Background Color of Screen.
             DX.SetWindowSizeChangeEnableFlag(true, false);    // Set Resizable and non-Scaling.
             DX.SetWindowSize(1400, 1000);                       // Set Window Size
@@ -62,9 +64,9 @@ namespace PuzzleSolver
             }
 
 			Puzzle initialPuzzle;
-			initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\13piece_1.txt");
-			//while (!Network.ProconPuzzleService.IsQrCodeReceived) ;
-			//initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
+			//initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\13piece_1.txt");
+			while (!Network.ProconPuzzleService.IsQrCodeReceived) ;
+			initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
 			if (initialPuzzle == null) { DX.Finalize(); return; }
 
 			controller.Syakunetsukun(initialPuzzle);
