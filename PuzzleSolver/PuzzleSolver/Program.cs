@@ -53,19 +53,13 @@ namespace PuzzleSolver
 
             WCFServer = new Network.WCF();
             try {
-                WCFServer.Open();
-            } catch(System.ServiceModel.AddressAccessDeniedException exp) {
-#if !DEBUG
-                MessageBox.Show(MainWindow, "HTTPサーバーの作成でアクセス拒否が起きました．netsh等で，権限付与してくださいな．", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
-#endif
+                WCFServer.StartWCFSender();
             } catch(Exception ex) {
 #if !DEBUG
                 MessageBox.Show(MainWindow, $"エラーが起きました．\n{ex}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
 #endif
             }
             controller.Solve(initialPuzzle);
-
-            WCFServer.Close();
 
             DX.Finalize();
         }
