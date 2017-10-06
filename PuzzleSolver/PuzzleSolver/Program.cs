@@ -64,12 +64,15 @@ namespace PuzzleSolver
 #endif
             }
 
-			Puzzle initialPuzzle;
+			Puzzle initialPuzzle = null;
 			//initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\ProconSample\qrresult.txt");
 			while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape)) {
 				if (Network.ProconPuzzleService.IsQrCodeReceived) { break; }
 			}
-			initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
+			if (Network.ProconPuzzleService.IsQrCodeReceived)
+			{
+				initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
+			}
 			if (initialPuzzle == null) { DX.Finalize(); return; }
 
 			controller.Syakunetsukun(initialPuzzle);
