@@ -34,7 +34,7 @@ namespace PuzzleSolver
             DX.ChangeWindowMode(true);                        // Set Window Mode against FullScreen Mode.
             DX.SetBackgroundColor(255, 255, 255);             // Set Background Color of Screen.
             DX.SetWindowSizeChangeEnableFlag(true, false);    // Set Resizable and non-Scaling.
-            DX.SetWindowSize(800, 600);                       // Set Window Size
+            DX.SetWindowSize(1400, 1000);                       // Set Window Size
             DX.SetAlwaysRunFlag(true);                        // Set to run even when the window is not active.
             DX.SetGraphMode(1920, 1080, 32);                  // Set Main Render's Size.
             if (DX.Init() == DX.Result.Error) Environment.Exit(-1);
@@ -46,9 +46,6 @@ namespace PuzzleSolver
             read = new Read();
             controller = new Controller(new Point(0, 0), 5.0, 1400, 1000);
 
-            Puzzle initialPuzzle = ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\ProconSample\hint1.txt");
-
-            if (initialPuzzle == null) { DX.Finalize(); return; }
             DX.ClsDx();
 
             WCFServer = new Network.WCF();
@@ -59,7 +56,14 @@ namespace PuzzleSolver
                 MessageBox.Show(MainWindow, $"エラーが起きました．\n{ex}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
 #endif
             }
-            controller.Solve(initialPuzzle);
+
+			Puzzle initialPuzzle;
+			initialPuzzle = ReadFile(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\ProconSample\qrresult.txt");
+			//while (!Network.ProconPuzzleService.IsQrCodeReceived) ;
+			//initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
+			if (initialPuzzle == null) { DX.Finalize(); return; }
+
+			controller.Syakunetsukun(initialPuzzle);
 
             DX.Finalize();
         }

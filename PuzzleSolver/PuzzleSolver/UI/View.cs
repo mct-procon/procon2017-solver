@@ -61,11 +61,11 @@ namespace PuzzleSolver.UI
         public void Draw(Puzzle puzzle)
         {	
 			//線分
-			for (int i = 0; i < puzzle.wakuLines.Count; i++) { DrawLine(puzzle.wakuLines[i]); }
-			for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; for (int j = 0; j < puzzle.pieces[i].lines.Count; j++) { DrawLine(puzzle.pieces[i].lines[j]); } }
+			for (int i = 0; i < puzzle.wakuLines.Count; i++) { DrawLine(puzzle.wakuLines[i], new DX.Color(0, 255, 0)); }
+			for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; for (int j = 0; j < puzzle.pieces[i].lines.Count; j++) { DrawLine(puzzle.pieces[i].lines[j], new DX.Color(0, 255, 0)); } }
 			//頂点列
-            for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; DrawPoly(puzzle.wakus[i]); }
-            for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; DrawPoly(puzzle.pieces[i]); }
+            for (int i = 0; i < puzzle.wakus.Count; i++) { if (!puzzle.wakus[i].isExist) continue; DrawPoly(puzzle.wakus[i], new DX.Color(255, 0, 255)); }
+            for (int i = 0; i < puzzle.pieces.Count; i++) { if (!puzzle.pieces[i].isExist) continue; DrawPoly(puzzle.pieces[i], new DX.Color(255, 0, 0)); }
 			//ピース番号
 			DrawPieceIds(puzzle);
 			//辺の数の総和
@@ -73,6 +73,37 @@ namespace PuzzleSolver.UI
 			for (int i = 0; i < puzzle.pieces.Count; i++) { edgeCount += puzzle.pieces[i].lines.Count; }
 			DX.DrawString(500, 100, 0, "合計辺数 = " + edgeCount);
         }
+
+		//強調表示
+		public void DrawPieceStrong(Puzzle puzzle, int pieceId, bool turnflag)
+		{
+			int i, j;
+			DX.Color color;
+
+			if (turnflag == false) { color = new DX.Color(255, 128, 0); }
+			else { color = new DX.Color(0, 128, 255); }
+
+			for (i = 0; i < puzzle.wakuLines.Count; i++)
+			{
+				Line line = puzzle.wakuLines[i];
+				if (line.initPieceId == pieceId)
+				{
+					DrawLine(line, color, 4);
+				}
+			}
+
+			for (i = 0; i < puzzle.pieces.Count; i++)
+			{
+				for (j = 0; j < puzzle.pieces[i].lines.Count; j++)
+				{
+					Line line = puzzle.pieces[i].lines[j];
+					if (line.initPieceId == pieceId)
+					{
+						DrawLine(line, color, 4);
+					}
+				}
+			}
+		}
 
         /// <summary>
         /// 更新クエリ
@@ -96,29 +127,23 @@ namespace PuzzleSolver.UI
         /// Draw(Puzzle)の中で呼ばれます
         /// </summary>
         /// <param name="poly">描画する多角形</param>
-        private void DrawPoly(Poly poly)
+        private void DrawPoly(Poly poly, DX.Color color, int thickness = 2)
         {
-            DX.Color color;
-            if (poly.isPiece) { color = new DX.Color(255, 0, 0); }
-            else { color = new DX.Color(255, 0, 255); }
-
             for (int i = 0; i < poly.Count; i++)
             {
                 Point s = toDrawPoint(poly.points[i]);
                 Point e = toDrawPoint(poly.points[i + 1]);
-                DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
+                DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, thickness);
 				DX.DrawString((float)s.Re, (float)s.Im, 255, i.ToString());
             }
         }
 
 		//線分の描画
-		private void DrawLine(Line line)
+		private void DrawLine(Line line, DX.Color color, int thickness = 2)
 		{
-			DX.Color color = new DX.Color(0, 255, 0);
-
 			Point s = toDrawPoint(line.start);
 			Point e = toDrawPoint(line.end);
-			DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, 2);
+			DX.DrawLine((int)s.Re, (int)s.Im, (int)e.Re, (int)e.Im, color, thickness);
 		}
 
 		//ピース番号の描画
@@ -171,5 +196,5 @@ namespace PuzzleSolver.UI
             Point p = cellPoint + center + CenterPoint;
             return (p - center) * Scale + center;
         }
-    }
+	}
 }
