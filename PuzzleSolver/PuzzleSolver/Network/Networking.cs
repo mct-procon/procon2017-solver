@@ -8,26 +8,10 @@ using Procon2017MCTProtocol;
 
 namespace PuzzleSolver.Network {
     public class WCF {
-<<<<<<< HEAD
-        IProconPuzzleService proconService;
-        ProconPuzzleService Receiver;
-
-        public void StartWCFSender()
-        {
-            Receiver = new ProconPuzzleService();
-
-            DuplexChannelFactory<IProconPuzzleService> factory = new DuplexChannelFactory<IProconPuzzleService>(proconService);
-            factory.Endpoint.Binding = new WSDualHttpBinding();
-            factory.Endpoint.Contract.ContractType = typeof(IProconPuzzleService);
-            factory.Endpoint.Address = new EndpointAddress(Parameter.ProconPuzzUri.AbsoluteUri);
-
-            proconService = factory.CreateChannel();
-=======
         ServiceHost svc = new ServiceHost(typeof(ProconPuzzleService));
         public void Open() {
             svc.AddServiceEndpoint(typeof(IProconPuzzleService), new BasicHttpBinding(), Parameter.ProconPuzzUri);
             svc.Open();
->>>>>>> parent of 07e90da... Updated Networking. not tested yet! : )
         }
 
         public void Close() {
