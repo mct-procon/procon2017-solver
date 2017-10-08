@@ -10,20 +10,28 @@ namespace PuzzleSolver.Core
 {
 	public class Solver
 	{
-		public List<Puzzle> ViewPuzzles { get; }		//ViewPuzzles.Count … 何手まで調べたか(最初も含む)、ViewPuzzles[i] … i手目の結果
-
+		public List<Puzzle> ViewPuzzles { get; }        //ViewPuzzles.Count … 何手まで調べたか(最初も含む)、ViewPuzzles[i] … i手目の結果
+		private bool IsCanceled = false;
+		
 		//コンストラクタ
 		public Solver()
 		{
 			ViewPuzzles = new List<Puzzle>();
 		}
 
+		//Solve()を終了させたいときに呼び出す
+		public void Cancel()
+		{
+			IsCanceled = true;
+		}
 
 		//問題を解く
 		public void Solve(Puzzle initialPuzzle)
 		{
+			IsCanceled = false;
+			ViewPuzzles.Clear();
 			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 20;
+			int beamWidth = 50;
 			int nowDepth = 0;
 			int maxDepth = initialPuzzle.pieces.Count;
 
@@ -41,6 +49,7 @@ namespace PuzzleSolver.Core
 				{
 					Puzzle nowPuzzle = States[nowDepth].Pop().Clone();
 					SetNextStates(nowPuzzle, beamWidth, States[nowDepth + 1], puzzlesInHeap);
+					if (IsCanceled) { return; }
 				}
 				if (States[nowDepth + 1].Count > 0) { ViewPuzzles.Add(States[nowDepth + 1].MaxValue().Clone()); nowDepth++; }
 				else { break; }
@@ -68,10 +77,29 @@ namespace PuzzleSolver.Core
 					{
 						for (int srcPointId = 0; srcPointId < srcPoly.Count; srcPointId++)
 						{
+							//配置情報でsrcPolyが与えられている場合
+							if (srcPoly.isPositionDetected)
+							{
+								if (Point.Compare(srcPoly.points[srcPointId], dstPoly.points[dstPointId]) != 0)
+								{
+									continue;
+								}
+							}
+
 							for (int option = 0; option < 4; option++)
 							{
+								if (IsCanceled) { return; }
 								int direction = option >> 1;   // means : option / 2
 								bool turnflag = (option & 1) == 1;  // means : (option % 2) == 1
+
+								//配置情報でsrcPolyが与えられている場合
+								if (srcPoly.isPositionDetected)
+								{
+									if (turnflag) { continue; }
+									Point mul = (dstPoly[dstPointId + direction] - dstPoly[dstPointId]) / (srcPoly[srcPointId - direction] - srcPoly[srcPointId]);
+									if (mul.Re != 1 || mul.Im != 0) { continue; }
+								}
+
 								int score = getScore(dstPoly, srcPoly, dstPointId, srcPointId, direction, turnflag, heap.Count == beamWidth ? heap.MinValue().boardScore + 1 - puzzle.boardScore : -1);
 								if (score < 0) { continue; }
 
@@ -113,7 +141,7 @@ namespace PuzzleSolver.Core
 		//結合度を得る
 		private int getScore(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId, int direction, bool turnflag, int bestScore)
 		{
-			Poly clonedSrcPoly = new Poly(new List<Point>(srcPoly.points), null, true);
+			Poly clonedSrcPoly = new Poly(new List<Point>(srcPoly.points), null, true, false);
 			if (turnflag) { clonedSrcPoly.Turn(false); }
 			move(dstPoly, clonedSrcPoly, dstPointId, srcPointId, direction);
 			int score = Poly.Evaluation(dstPoly, clonedSrcPoly, dstPointId, srcPointId);

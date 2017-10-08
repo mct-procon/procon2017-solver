@@ -46,19 +46,19 @@ namespace PuzzleSolver.Geometry
 				for (int j = 0; j < edgeTo[i].Count; j++)
 				{
 					if (used[i][j]) { continue; }
-					polys.AddRange(getPolys(i, j, dstPoly.isPiece, lines));
+					polys.AddRange(getPolys(i, j, dstPoly.isPiece, lines, srcPoly.isPositionDetected || dstPoly.isPositionDetected));
 				}
 			}
 
 			//エラー処理
 			if (dstPoly.isPiece && polys.Count > 1) { return new List<Poly>(); }	//2ピースの内部に穴があるケース
-			if (!dstPoly.isPiece && polys.Count == 0) { polys.Add(new Poly(new List<Point>(), lines, false)); return polys; }	//枠穴に完全にピースが収まったケース
+			if (!dstPoly.isPiece && polys.Count == 0) { polys.Add(new Poly(new List<Point>(), lines, false, false)); return polys; }	//枠穴に完全にピースが収まったケース
 
 			//冗長点削除 + 辺生成
 			List<Poly> ret = new List<Poly>();
 			for (int i = 0; i < polys.Count; i++)
 			{
-				ret.Add(fixPoly(polys[i].points, lines, polys[i].isPiece));
+				ret.Add(fixPoly(polys[i].points, lines, polys[i].isPiece, srcPoly.isPositionDetected || dstPoly.isPositionDetected));
 			}
 			return ret;
 		}
@@ -102,9 +102,9 @@ namespace PuzzleSolver.Geometry
 				if (!IsWall(dstPoly, srcPoly, l)) { edgeTo[pointId[i + 1]].Add(pointId[i]); }
 			}
 		}
-	
+
 		//サイクルを検出して多角形を作る
-		private List<Poly> getPolys(int startPointId, int startEdgeId, bool isPiece, List<Line> lines)
+		private List<Poly> getPolys(int startPointId, int startEdgeId, bool isPiece, List<Line> lines, bool isPositionDetected)
 		{
 			List<int> cycle = getCycle(startPointId, startEdgeId, isPiece);
 			List<List<int>> cycles = BreakDownCycle(cycle);
@@ -118,7 +118,7 @@ namespace PuzzleSolver.Geometry
 					points.Add(pointList[cycles[i][j]]);
 				}
 
-				ret.Add(fixPoly(points, lines, isPiece));
+				ret.Add(fixPoly(points, lines, isPiece, isPositionDetected));
 			}
 			return ret;
 		}
@@ -209,7 +209,7 @@ namespace PuzzleSolver.Geometry
 		}
 
 		//冗長点を削除する
-		Poly fixPoly(List<Point> points, List<Line> lines, bool isPiece)
+		Poly fixPoly(List<Point> points, List<Line> lines, bool isPiece, bool isPositionDetected)
 		{
 			List<Point> ret = new List<Point>();
 
@@ -222,7 +222,7 @@ namespace PuzzleSolver.Geometry
 			}
 			ret.Add(ret[0]);
 
-			return new Poly(ret, lines, isPiece);
+			return new Poly(ret, lines, isPiece, isPositionDetected);
 		}
 	}
 }

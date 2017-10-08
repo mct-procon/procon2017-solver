@@ -57,7 +57,7 @@ namespace PuzzleSolver.Geometry
         /// ベクトルの外積
         /// </summary>
         public static double Cross(Point a, Point b) => a.Re * b.Im - a.Im * b.Re;
-        
+       
         /// <summary>
         /// 点の進行方向を判定する
         /// </summary>

@@ -70,6 +70,36 @@ namespace PuzzleSolver.UI
 
 				view.UpdateDrawInfo();
 
+				//QRコードが送信された場合（形状情報…readして再起動. 配置情報…渡されたピースを特定し、位置を合わせ、位置確定フラグを立てる）
+				if (Network.ProconPuzzleService.IsQrCodeReceived)
+				{
+					Procon2017MCTProtocol.QRCodeData QrCode = Network.ProconPuzzleService.QrCode;
+
+					solve.Cancel();
+					if (!QrCode.IsHint)
+					{
+						Read read = new Read();
+						initialPuzzle = read.ReadFromQRCode(QrCode);
+					}
+					else
+					{
+						List<Poly> polys = new List<Poly>();
+						for (int i = 0; i < QrCode.Polygons.Count; i++)
+						{
+							polys.Add(Poly.ParsePolyFromQRCode(QrCode.Polygons[i], true));
+						}
+						for (int i = 0; i < polys.Count; i++)
+						{
+							Tuple<int, int, int, bool> hint = DetectPiece(initialPuzzle, polys[i]);
+							if (hint == null) { continue; }
+							SetDetectPiece(polys[i], initialPuzzle.pieces[hint.Item1], hint.Item2, hint.Item3, hint.Item4);
+						}
+					}
+					System.Threading.Thread.Sleep(100);
+					Task.Run(() => solve.Solve(initialPuzzle));
+					cursor = 0;
+				}
+
 				//ViewPuzzles.Count == 0だったら表示に移らない
 				if (solve.ViewPuzzles.Count == 0) { continue; }
 
@@ -93,6 +123,72 @@ namespace PuzzleSolver.UI
 					view.DrawPieceStrong(ViewPuzzle, strongDrawPieceId, false);
 				}
 			}
+		}
+
+		//配置情報の多角形poly, 形状情報initialPuzzleが与えられるので、何番のピースが与えられたかを特定せよ。
+		//ピース番号, dstPointId, srcPointId, turnflagをTuple<int, int, int, bool> で返す。
+		//どれにも当てはまらない場合はnullを返すこと。これは支援システムと違って、かなり厳密に動作する。
+		private Tuple<int, int, int, bool> DetectPiece(Puzzle initialPuzzle, Poly poly)
+		{
+			for (int i = 0; i < initialPuzzle.initPieceNum; i++)
+			{
+				Poly srcPoly = initialPuzzle.pieces[i].Clone();
+				if (srcPoly.Count != poly.Count) { continue; }
+				if (Math.Abs(srcPoly.Area - poly.Area) >= 0.5) { continue; }
+				for (int dstPointId = 0; dstPointId < poly.Count; dstPointId++)
+				{
+					double dArg = poly.Arg(dstPointId);
+					if (dArg < 0) { dArg += 2 * Math.PI; }
+					for (int srcPointId = 0; srcPointId < srcPoly.Count; srcPointId++)
+					{
+						double sArg = srcPoly.Arg(srcPointId);
+						if (sArg < 0) { sArg += 2 * Math.PI; }
+						if (Math.Abs(dArg - sArg) * 180 / Math.PI > 0.1) { continue; }  //枝刈り
+
+						//実際に動かしてみる
+						move(poly, srcPoly, dstPointId, srcPointId, false, false);
+						if (IsSamePoly(poly, srcPoly, dstPointId, srcPointId)) { return new Tuple<int, int, int, bool>(i, dstPointId, srcPointId, false); }
+						move(poly, srcPoly, dstPointId, srcPointId, true, false);
+						if (IsSamePoly(poly, srcPoly, dstPointId, srcPointId)) { return new Tuple<int, int, int, bool>(i, dstPointId, srcPointId, true); }
+						srcPoly.Turn(false);
+					}
+				}
+			}
+			return null;
+		}
+
+		//Detect情報の更新 (srcPolyの更新)
+		private void SetDetectPiece(Poly hintPiece, Poly puzzlePiece, int dstPointId, int srcPointId, bool turnflag)
+		{
+			move(hintPiece, puzzlePiece, dstPointId, srcPointId, turnflag, true);
+			puzzlePiece.DetectPosition();
+		}
+		
+		//srcPolyとdstPolyを2点で合わせる
+		private void move(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId, bool turnflag, bool isUpdateLine)
+		{
+			if (turnflag) { srcPoly.Turn(isUpdateLine); }
+			Point mul = (dstPoly[dstPointId + 1] - dstPoly[dstPointId]) / (srcPoly[srcPointId + 1] - srcPoly[srcPointId]);
+			mul /= mul.Abs;
+			srcPoly.Mul(mul, isUpdateLine);
+			srcPoly.Trans(dstPoly[dstPointId] - srcPoly[srcPointId], isUpdateLine);
+		}
+
+		//2つの多角形が同じ点列であるかを調べる。（ただし、頂点番号のrotationがある可能性はある）
+		bool IsSamePoly(Poly dstPoly, Poly srcPoly, int dstPointId, int srcPointId)
+		{
+			if (dstPoly.Count != srcPoly.Count) { return false; }
+			int n = dstPoly.Count;
+			double eps = 1e-10;
+
+			for (int i = 0; i < n; i++)
+			{
+				if ((dstPoly[i + dstPointId] - srcPoly[i + srcPointId]).Norm >= eps)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 
 
@@ -138,7 +234,7 @@ namespace PuzzleSolver.UI
 			for (i = 0; i < puzzle.initPieceNum; i++)
 			{
 				initPieces[i].Add(initPieces[i][0]);
-				Poly initPiece = new Poly(initPieces[i], new List<Line>(), true);
+				Poly initPiece = new Poly(initPieces[i], new List<Line>(), true, false);
 				double eval1 = EvalCircleRadiusLog(initPiece.Clone(), piece.Clone());
 				double eval2 = EvalSumLengthLog(initPiece, piece.Clone());
 				double a = Math.Max(eval1, eval2);
@@ -249,7 +345,7 @@ namespace PuzzleSolver.UI
 				}
 				newPoints.Add(newPoints[0]);
 
-				poly = new Poly(newPoints, new List<Line>(), true);
+				poly = new Poly(newPoints, new List<Line>(), true, false);
 			}
 		}
 	}

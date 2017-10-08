@@ -138,7 +138,7 @@ namespace PuzzleSolver.Core
 				}
 			}
 
-			return new Poly(points, lines, isPiece);
+			return new Poly(points, lines, isPiece, false);
 		}
 
 		//空文字ではない行を返す. エラー時はnullを返す.

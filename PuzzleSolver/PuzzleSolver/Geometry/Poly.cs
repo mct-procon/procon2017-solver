@@ -19,15 +19,17 @@ namespace PuzzleSolver.Geometry
         public List<Line> lines { get; private set; }
         public bool isPiece;
         public bool isExist;
+		public bool isPositionDetected { get; private set; }
 
         //コンストラクタ
         public Poly() { }
-        public Poly(List<Point> points, List<Line> lines, bool isPiece)
+        public Poly(List<Point> points, List<Line> lines, bool isPiece, bool isPositionDetected)
         {
             this.points  = points;
             this.lines   = lines;
             this.isPiece = isPiece;
             this.isExist = true;
+			this.isPositionDetected = isPositionDetected;
         }
 
         //多角形の頂点数
@@ -104,6 +106,12 @@ namespace PuzzleSolver.Geometry
             }
             return flag;
         }
+
+		//点列の場所が確定
+		public void DetectPosition()
+		{
+			isPositionDetected = true;
+		}
 
         //平行移動
         public void Trans(Point t, bool isUpdateLines)
@@ -252,9 +260,7 @@ namespace PuzzleSolver.Geometry
         //クローン (深いコピー)
         public Poly Clone()
         {
-            Poly ret = new Poly();
-            ret.lines = new List<Line>(this.lines);
-            ret.points = new List<Point>(this.points);
+            Poly ret = new Poly(new List<Point>(points), new List<Line>(lines), isPiece, isPositionDetected);
             for (int i = 0; i < ret.lines.Count; i++) { ret.lines[i] = ret.lines[i].Clone(); }
             ret.isPiece = this.isPiece;
             ret.isExist = this.isExist;
@@ -283,7 +289,7 @@ namespace PuzzleSolver.Geometry
 				}
 			}
 
-			Poly poly = new Poly(points, lines, isPiece);
+			Poly poly = new Poly(points, lines, isPiece, false);
 
 			if (isPiece && poly.Area < 0) { poly.points.Reverse(); }
 			if (!isPiece && poly.Area > 0) { poly.points.Reverse(); }
@@ -319,6 +325,15 @@ namespace PuzzleSolver.Geometry
 				}
 			}
 			return c;
+		}
+
+		//偏角
+		public double Arg(int id)
+		{
+			Point a = this[id + 1] - this[id];
+			Point b = this[id - 1] - this[id];
+			Point mul = b / a;
+			return Math.Atan2(mul.Im, mul.Re);
 		}
 	}
 }

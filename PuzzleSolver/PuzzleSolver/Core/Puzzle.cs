@@ -14,7 +14,7 @@ namespace PuzzleSolver.Core
 		public List<Line> wakuLines;    //枠の表示辺 (探索することを考えているので, 深いコピーを使って, メモリ独立な実体を作ります.)
 		public int initPieceNum { get; private set; } //最初のピースの個数 (View, 多角形マージ時の更新で使う)
 		public int boardScore { get; private set; }   //盤面スコア.
-		public long boardHash { get; private set; }	  //盤面ハッシュ値. 頂点列に使われている線分の集合とハッシュ値を対応させている。
+		public long boardHash { get; private set; }   //盤面ハッシュ値. 頂点列に使われている線分の集合とハッシュ値を対応させている。
 
         //コンストラクタ
         public Puzzle() { }
