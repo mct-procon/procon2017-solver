@@ -69,15 +69,16 @@ namespace PuzzleSolver
 			}
 
 			Puzzle initialPuzzle = null;
-			initialPuzzle = ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\56piece_1.txt");
-			/*while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape))
+			//initialPuzzle = ReadFile(@"C:\Users\naott\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\56piece_1.txt");
+			while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape))
 			{
 				if (Network.ProconPuzzleService.IsQrCodeReceived) { break; }
 			}
 			if (Network.ProconPuzzleService.IsQrCodeReceived)
 			{
 				initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
-			}*/
+			}
+
 			if (initialPuzzle == null) { DX.Finalize(); return; }
 
 			controller.Syakunetsukun(initialPuzzle);

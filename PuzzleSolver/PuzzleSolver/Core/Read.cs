@@ -56,7 +56,17 @@ namespace PuzzleSolver.Core
 			List<bool> isPieceExist = new List<bool>();
 			for (int i = 0; i < pieceTable.Count; i++) { isPieceExist.Add(true); }
 
-			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, isPieceExist, pieceTable.Count, wakuInitialTurnFlag, wakuInitialMul);
+			//ヒント
+			List<bool> IsDetectPieceHint = new List<bool>();
+			List<int> PieceHintRotateId = new List<int>();
+
+			for (int i = 0; i < pieceTable.Count; i++)
+			{
+				IsDetectPieceHint.Add(false);
+				PieceHintRotateId.Add(-1);
+			}
+
+			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, isPieceExist, pieceTable.Count, wakuInitialTurnFlag, wakuInitialMul, IsDetectPieceHint, PieceHintRotateId);
 
 			//盤面評価値, 盤面ハッシュ
 			puzzle.setBoardScore(0);
@@ -131,7 +141,17 @@ namespace PuzzleSolver.Core
 			List<bool> isPieceExist = new List<bool>();
 			for (int i = 0; i < pieceTable.Count; i++) { isPieceExist.Add(true); }
 
-			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, isPieceExist, pieceTable.Count, wakuInitialTurnFlag, wakuInitialMul);
+			//ヒント
+			List<bool> IsDetectPieceHint = new List<bool>();
+			List<int> PieceHintRotateId = new List<int>();
+
+			for (int i = 0; i < pieceTable.Count; i++)
+			{
+				IsDetectPieceHint.Add(false);
+				PieceHintRotateId.Add(-1);
+			}
+
+			Puzzle puzzle = new Puzzle(wakus, wakuLines, pieceTable, isPieceExist, pieceTable.Count, wakuInitialTurnFlag, wakuInitialMul, IsDetectPieceHint, PieceHintRotateId);
 
 			//盤面評価値, 盤面ハッシュ
 			puzzle.setBoardScore(0);

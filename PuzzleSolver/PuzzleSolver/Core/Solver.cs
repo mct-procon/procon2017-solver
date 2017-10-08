@@ -9,20 +9,27 @@ namespace PuzzleSolver.Core
 {
 	public class Solver
 	{
-		public List<Puzzle> ViewPuzzles { get; }        //ViewPuzzles.Count … 何手まで調べたか(最初も含む)、ViewPuzzles[i] … i手目の結果
-		public List<List<int>> evalScores { get; }		//評価値, デバッグ用
+		private volatile bool isContinue = true;
+
+		public List<Puzzle> ViewPuzzles { get; private set; }        //ViewPuzzles.Count … 何手まで調べたか(最初も含む)、ViewPuzzles[i] … i手目の結果
 
 		//コンストラクタ
 		public Solver()
 		{
 			ViewPuzzles = new List<Puzzle>();
-			evalScores = new List<List<int>>();
+		}
+
+		public void Cancel()
+		{
+			isContinue = false;
 		}
 
 
 		//問題を解く
 		public void Solve(Puzzle initialPuzzle)
 		{
+			isContinue = true;
+			ViewPuzzles = new List<Puzzle>();
 			List<SkewHeap> States = new List<SkewHeap>();
 			int beamWidth = 1000;
 			int nowDepth = 0;
@@ -31,9 +38,6 @@ namespace PuzzleSolver.Core
 			for (int i = 0; i <= maxDepth; i++) { States.Add(new SkewHeap()); }
 			States[0].Push(initialPuzzle);
 			ViewPuzzles.Add(initialPuzzle); //0手目の結果
-
-			for (int i = 0; i <= maxDepth; i++) { evalScores.Add(new List<int>()); }
-			evalScores[0].Add(initialPuzzle.boardScore);
 
 			//パズルを解く (1手進める) → ビームサーチ
 			while (nowDepth < maxDepth)
@@ -45,18 +49,10 @@ namespace PuzzleSolver.Core
 				{
 					Puzzle nowPuzzle = States[nowDepth].Pop().Clone();
 					SetNextStates(nowPuzzle, beamWidth, States[nowDepth + 1], puzzlesInHeap);
+					if (!isContinue) { return; }
 				}
 				if (States[nowDepth + 1].Count > 0) { ViewPuzzles.Add(States[nowDepth + 1].MaxValue().Clone()); nowDepth++; }
 				else { break; }
-
-				//デバッグ
-				SkewHeap sh = States[nowDepth].CloneShallow();
-				while (sh.Count > 0)
-				{
-					evalScores[nowDepth].Add(sh.MinValue().boardScore);
-					sh.Pop();
-				}
-				evalScores[nowDepth].Reverse();
 			}
 		}
 
@@ -75,6 +71,11 @@ namespace PuzzleSolver.Core
 			   Poly dstPoly = puzzle.wakus[wakuId];
 			   for (int i = 0; i < srcPolys.Count; i++)
 			   {
+				   if (puzzle.IsDetectPieceHint[srcPolyId])
+				   {
+					   if (i != puzzle.PieceHintRotateId[srcPolyId]) { continue; }
+				   }
+
 				   int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);
 				   if (score < 0) { continue; }
 				   Puzzle nextPuzzle = GetNextPuzzle(puzzle, wakuId, srcPolyId, i, score);

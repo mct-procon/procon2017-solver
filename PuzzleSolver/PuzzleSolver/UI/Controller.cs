@@ -70,6 +70,31 @@ namespace PuzzleSolver.UI
 
 				view.UpdateDrawInfo();
 
+				//ヒントが送られてきたら、initialPuzzleと照合してヒントとして与えられたピースを検索し、ソルバを再起動する。
+				if (Network.ProconPuzzleService.IsQrCodeReceived /*&& Network.ProconPuzzleService.QrCode.IsHint*/)
+				{
+					System.Diagnostics.Debug.WriteLine("hinted");
+					solve.Cancel();
+					System.Threading.Thread.Sleep(100);
+
+					List<Poly> polys = new List<Poly>();
+					for (int i = 0; i < Network.ProconPuzzleService.QrCode.Polygons.Count; i++)
+					{
+						polys.Add(Poly.ParsePolyFromQRCode(Network.ProconPuzzleService.QrCode.Polygons[i], true));
+					}
+					List<Tuple<int, int>> hints = new List<Tuple<int, int>>();
+					for (int i = 0; i < polys.Count; i++)
+					{
+						Tuple<int, int> hint = GetHint(initialPuzzle, polys[i]);	//(polyId, rotateId)
+						if (hint == null) { continue; }
+						hints.Add(hint);
+					}
+					initialPuzzle.UpdateHint(hints);
+					cursor = 0;
+
+					Task.Run(() => solve.Solve(initialPuzzle));
+				}
+
 				//ViewPuzzles.Count == 0だったら表示に移らない
 				if (solve.ViewPuzzles.Count == 0) { continue; }
 
@@ -95,11 +120,44 @@ namespace PuzzleSolver.UI
 				{
 					view.DrawPieceStrong(ViewPuzzle, strongDrawPieceId, false);
 				}
-
-				//デバッグとして評価値を表示する
-				List<int> scores = solve.evalScores[cursor];
-				DX.DrawString(100, 100, 0, scores.Count.ToString());
 			}
+		}
+
+		//ヒントを返す。initialPuzzleと照合する。(多角形番号, pieceTable[polyId][向き番号]の向き番号)を返す。
+		private Tuple<int, int> GetHint(Puzzle initialPuzzle, Poly poly)
+		{
+			int i, j, k;
+
+			for (i = 0; i < initialPuzzle.pieceTable.Count; i++)
+			{
+				List<Poly> pieceList = initialPuzzle.pieceTable[i];
+				for (j = 0; j < pieceList.Count; j++)
+				{
+					//pieceList[j]とpolyが平行移動で一致できる関係にあるか？
+					if (IsMacheByTransrate(pieceList[j], poly))
+					{
+						return new Tuple<int, int>(i, j);
+					}
+				}
+			}
+			return null;
+		}
+
+		//poly1とpoly2が平行移動で一致できる関係にあるか？
+		private bool IsMacheByTransrate(Poly poly1, Poly poly2)
+		{
+			if (poly1.points.Count != poly2.points.Count) { return false; }
+			if (poly1.points.Count == 0) { return false; }
+
+			Point t = poly1.points[0] - poly2.points[0];
+			for (int i = 1; i < poly1.Count; i++)
+			{
+				if (Point.Compare(t, poly1.points[i] - poly2.points[i]) != 0)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 
 		//最初の枠穴の反転, 回転を打ち消す変換をする。(表示用データの生成. 計算には用いない！）
