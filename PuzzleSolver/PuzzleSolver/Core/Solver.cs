@@ -23,7 +23,7 @@ namespace PuzzleSolver.Core
 		public void Solve(Puzzle initialPuzzle)
 		{
 			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 50;
+			int beamWidth = 20;
 			int nowDepth = 0;
 			int maxDepth = initialPuzzle.pieces.Count;
 
