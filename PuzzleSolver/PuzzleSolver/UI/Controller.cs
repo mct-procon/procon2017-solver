@@ -71,16 +71,16 @@ namespace PuzzleSolver.UI
 				view.UpdateDrawInfo();
 
 				//ヒントが送られてきたら、initialPuzzleと照合してヒントとして与えられたピースを検索し、ソルバを再起動する。
-				if (Network.ProconPuzzleService.IsQrCodeReceived /*&& Network.ProconPuzzleService.QrCode.IsHint*/)
+				if (Network.ProconPuzzleService.IsQrCodeReceived && Network.ProconPuzzleService.QrCode.IsHint)
 				{
-					System.Diagnostics.Debug.WriteLine("hinted");
+					Procon2017MCTProtocol.QRCodeData QrCode = Network.ProconPuzzleService.QrCode;
 					solve.Cancel();
 					System.Threading.Thread.Sleep(100);
 
 					List<Poly> polys = new List<Poly>();
-					for (int i = 0; i < Network.ProconPuzzleService.QrCode.Polygons.Count; i++)
+					for (int i = 0; i < QrCode.Polygons.Count; i++)
 					{
-						polys.Add(Poly.ParsePolyFromQRCode(Network.ProconPuzzleService.QrCode.Polygons[i], true));
+						polys.Add(Poly.ParsePolyFromQRCode(QrCode.Polygons[i], true));
 					}
 					List<Tuple<int, int>> hints = new List<Tuple<int, int>>();
 					for (int i = 0; i < polys.Count; i++)
@@ -126,7 +126,7 @@ namespace PuzzleSolver.UI
 		//ヒントを返す。initialPuzzleと照合する。(多角形番号, pieceTable[polyId][向き番号]の向き番号)を返す。
 		private Tuple<int, int> GetHint(Puzzle initialPuzzle, Poly poly)
 		{
-			int i, j, k;
+			int i, j;
 
 			for (i = 0; i < initialPuzzle.pieceTable.Count; i++)
 			{
@@ -149,15 +149,21 @@ namespace PuzzleSolver.UI
 			if (poly1.points.Count != poly2.points.Count) { return false; }
 			if (poly1.points.Count == 0) { return false; }
 
-			Point t = poly1.points[0] - poly2.points[0];
-			for (int i = 1; i < poly1.Count; i++)
+			int i, j;
+			int n = poly1.Count;
+			for (i = 0; i < n; i++)
 			{
-				if (Point.Compare(t, poly1.points[i] - poly2.points[i]) != 0)
+				Point t = poly1[i] - poly2[0];
+				for (j = 1; j < n; j++)
 				{
-					return false;
+					if (Point.Compare(t, poly1[i + j] - poly2[j]) != 0)
+					{
+						break;
+					}
 				}
+				if (j == n) { return true; }
 			}
-			return true;
+			return false;
 		}
 
 		//最初の枠穴の反転, 回転を打ち消す変換をする。(表示用データの生成. 計算には用いない！）

@@ -31,7 +31,7 @@ namespace PuzzleSolver.Core
 			isContinue = true;
 			ViewPuzzles = new List<Puzzle>();
 			List<SkewHeap> States = new List<SkewHeap>();
-			int beamWidth = 1000;
+			int beamWidth = 1500;
 			int nowDepth = 0;
 			int maxDepth = initialPuzzle.initPieceNum;
 
@@ -73,7 +73,7 @@ namespace PuzzleSolver.Core
 			   {
 				   if (puzzle.IsDetectPieceHint[srcPolyId])
 				   {
-					   if (i != puzzle.PieceHintRotateId[srcPolyId]) { continue; }
+					   //if (i != puzzle.PieceHintRotateId[srcPolyId]) { continue; }
 				   }
 
 				   int score = GetScore(dstPoly, srcPolys[i], heap.Count < beamWidth ? -1 : heap.MinValue().boardScore - puzzle.boardScore + 1);

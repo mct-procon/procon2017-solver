@@ -302,11 +302,6 @@ namespace PuzzleSolver.Core
 		//Validな回転方法 (すべての点座標が整数になる原点中心の回転をしたあとのピース）をすべて返す (minestPointIdは更新する)
 		private List<Poly> GetRotatedPieceList(Poly piece)
 		{
-			for (int k = 0; k < piece.Count; k++)
-			{
-				Point p = piece.points[k + 1] - piece.points[k];
-			}
-
 			List<Point> muls = GetRotateCandidate(piece.points[1] - piece.points[0]);
 			List<Poly> ret = new List<Poly>();
 			int i, j;
