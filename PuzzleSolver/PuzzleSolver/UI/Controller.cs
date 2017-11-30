@@ -20,7 +20,6 @@ namespace PuzzleSolver.UI
 		public Controller(Point t, double scale, int windowSizeX, int windowSizeY)
 		{
 			view = new View(t, scale, windowSizeX, windowSizeY);
-			solve = new Solver();
 		}
 
 
@@ -29,8 +28,13 @@ namespace PuzzleSolver.UI
 		// ・ソルバ（計算）
 		// でそれぞれ1つずつのスレッドを立ち上げる。
 		// ソルバのViewPuzzleの中身をビューで表示する。
-		public void Syakunetsukun(Puzzle initialPuzzle)
+		//
+		//返り値：True：正常終了
+		public bool Syakunetsukun(Puzzle initialPuzzle)
 		{
+			//ソルバーを初期化（ログを消すなど）
+			solve = new Solver();
+
 			//ソルバのスレッドを立ち上げる
 			Task.Run(() => solve.Solve(initialPuzzle));
 			//solve.Solve(initialPuzzle);
@@ -48,8 +52,8 @@ namespace PuzzleSolver.UI
 				key = DX.GetHitKeyStateAll();
 
 				//キー操作
-				if (key.Item1[DX.KeyInput.Escape])
-					return;
+				if (!prev_key.Item1[DX.KeyInput.Escape] && key.Item1[DX.KeyInput.Escape])
+					return true;
 
 				if (!prev_key.Item1[DX.KeyInput.NumPadEnter] && key.Item1[DX.KeyInput.NumPadEnter])
 				{
@@ -92,6 +96,7 @@ namespace PuzzleSolver.UI
 					view.DrawPieceStrong(ViewPuzzle, strongDrawPieceId, false);
 				}
 			}
+			return false;
 		}
 
 
