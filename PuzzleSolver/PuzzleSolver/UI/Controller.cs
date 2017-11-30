@@ -29,8 +29,11 @@ namespace PuzzleSolver.UI
 		// ・ソルバ（計算）
 		// でそれぞれ1つずつのスレッドを立ち上げる。
 		// ソルバのViewPuzzleの中身をビューで表示する。
-		public void Syakunetsukun(Puzzle initialPuzzle)
+		public bool Syakunetsukun(Puzzle initialPuzzle)
 		{
+			//ソルバーを初期化（ログを消すなど）
+			solve = new Solver();
+
 			//ソルバのスレッドを立ち上げる
 			Task.Run(() => solve.Solve(initialPuzzle));
 			//solve.Solve(initialPuzzle);
@@ -48,8 +51,8 @@ namespace PuzzleSolver.UI
 				key = DX.GetHitKeyStateAll();
 
 				//キー操作
-				if (key.Item1[DX.KeyInput.Escape])
-					return;
+				if (!prev_key.Item1[DX.KeyInput.Escape] && key.Item1[DX.KeyInput.Escape])
+					return true;
 
 				if (!prev_key.Item1[DX.KeyInput.NumPadEnter] && key.Item1[DX.KeyInput.NumPadEnter])
 				{
@@ -70,40 +73,11 @@ namespace PuzzleSolver.UI
 
 				view.UpdateDrawInfo();
 
-				//ヒントが送られてきたら、initialPuzzleと照合してヒントとして与えられたピースを検索し、ソルバを再起動する。
-				if (Network.ProconPuzzleService.IsQrCodeReceived && Network.ProconPuzzleService.QrCode.IsHint)
-				{
-					Procon2017MCTProtocol.QRCodeData QrCode = Network.ProconPuzzleService.QrCode;
-					solve.Cancel();
-					System.Threading.Thread.Sleep(100);
-
-					List<Poly> polys = new List<Poly>();
-					for (int i = 0; i < QrCode.Polygons.Count; i++)
-					{
-						polys.Add(Poly.ParsePolyFromQRCode(QrCode.Polygons[i], true));
-					}
-					List<Tuple<int, int>> hints = new List<Tuple<int, int>>();
-					for (int i = 0; i < polys.Count; i++)
-					{
-						Tuple<int, int> hint = GetHint(initialPuzzle, polys[i]);	//(polyId, rotateId)
-						if (hint == null) { continue; }
-						hints.Add(hint);
-					}
-					initialPuzzle.UpdateHint(hints);
-					cursor = 0;
-
-					Task.Run(() => solve.Solve(initialPuzzle));
-				}
-
 				//ViewPuzzles.Count == 0だったら表示に移らない
 				if (solve.ViewPuzzles.Count == 0) { continue; }
 
 				//表示したいパズルを渡す
 				Puzzle ViewPuzzle = solve.ViewPuzzles[cursor].Clone();
-
-				//最初の, 枠穴の反転, 回転を打ち消す変換をする。
-				revertInitialWakuTransform(ViewPuzzle);
-
 				if (Network.ProconPuzzleService.IsPolygonReceived)
 				{
 					//支援システムから、Webカメラに写った多角形を読み取る。もし読み取れて、かつ、該当する多角形が存在すればViewクラスで表示。
@@ -121,6 +95,7 @@ namespace PuzzleSolver.UI
 					view.DrawPieceStrong(ViewPuzzle, strongDrawPieceId, false);
 				}
 			}
+			return false;
 		}
 
 		//ヒントを返す。initialPuzzleと照合する。(多角形番号, pieceTable[polyId][向き番号]の向き番号)を返す。

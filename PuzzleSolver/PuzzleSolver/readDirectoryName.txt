@@ -1,0 +1,10 @@
+C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti
+
+//1行目に
+//QR, または, テストケースのフォルダ（単体）を指定する。
+//QRを指定すると、QRコードから問題を1問読み取って解く。
+//
+//Naottiと指定すると、Naottiフォルダ内のテストケースを
+//1個ずつ独立に解いていく。
+//デフォルトは「QR」.
+//相対パスで動かなかったら、絶対パスで指定してください。

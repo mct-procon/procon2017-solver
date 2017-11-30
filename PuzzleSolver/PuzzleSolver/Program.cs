@@ -9,6 +9,7 @@ using PuzzleSolver.Geometry;
 using PuzzleSolver.UI;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using System.IO;
 
 namespace PuzzleSolver
 {
@@ -31,8 +32,9 @@ namespace PuzzleSolver
 		[STAThread]
 		static void Main(string[] args)
 		{
-			DX.SetMainWindowText("Gatiyatte");
 			DX.SetDoubleStartValidFlag(1);
+
+			DX.SetMainWindowText("Gatiyatte");
 			DX.ChangeWindowMode(true);                        // Set Window Mode against FullScreen Mode.
 			DX.SetBackgroundColor(255, 255, 255);             // Set Background Color of Screen.
 			DX.SetWindowSizeChangeEnableFlag(1, false);    // Set Resizable and non-Scaling.
@@ -68,24 +70,74 @@ namespace PuzzleSolver
 #endif
 			}
 
-			Puzzle initialPuzzle = null;
-			//initialPuzzle = ReadFile(@"C:\Users\Hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\TestCases\Naotti\31piece_1.txt");
-			while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape))
-			{
-				if (Network.ProconPuzzleService.IsQrCodeReceived) { break; }
-			}
-			if (Network.ProconPuzzleService.IsQrCodeReceived)
-			{
-				initialPuzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
-			}
+			string directoryName = GetReadDirectoryName(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\readDirectoryName.txt");
+			List<Puzzle> initialPuzzles = SetInitialPuzzles(directoryName);
 
-			if (initialPuzzle == null) { DX.Finalize(); return; }
-
-			controller.Syakunetsukun(initialPuzzle);
+			foreach (Puzzle initialPuzzle in initialPuzzles)
+			{
+				bool res = controller.Syakunetsukun(initialPuzzle);
+				if (!res) { break; }
+			}
 
 			WCFServer.Close();
 
 			DX.Finalize();
+		}
+
+		// どのフォルダからテストケースを読み込むか？（QRコードの場合は、QRを返す）
+		static string GetReadDirectoryName(string directoryNameFile)
+		{
+			StreamReader reader = new StreamReader(directoryNameFile);
+
+			if (reader == null) { return "QR"; }
+			try
+			{
+				return reader.ReadLine();
+			} catch
+			{
+				return "QR";
+			}
+		}
+
+		// 指定したディレクトリからパズル列を読み込む
+		static List<Puzzle> SetInitialPuzzles(string directoryName)
+		{
+			List<Puzzle> puzzles = new List<Puzzle>();
+
+			if (directoryName.CompareTo("QR") != 0)
+			{
+				DirectoryInfo directoryInfo = new DirectoryInfo(directoryName);
+				FileInfo[] files = directoryInfo.GetFiles();
+				List<string> fileNames = new List<string>();
+
+				foreach (FileInfo file in files)
+				{
+					fileNames.Add(file.FullName);
+				}
+
+				foreach (string fileName in fileNames)
+				{
+					Puzzle puzzle = ReadFile(fileName);
+					if (puzzle != null)
+					{
+						puzzles.Add(puzzle);
+					}
+				}
+			}
+
+			else
+			{
+				while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0 && !DX.CheckHitKey(DX.KeyInput.Escape))
+				{
+					if (Network.ProconPuzzleService.IsQrCodeReceived) { break; }
+				}
+				if (Network.ProconPuzzleService.IsQrCodeReceived)
+				{
+					Puzzle puzzle = read.ReadFromQRCode(Network.ProconPuzzleService.QrCode);
+					if (puzzle != null) { puzzles.Add(puzzle); }
+				}
+			}
+			return puzzles;
 		}
 
 		/// <summary>
