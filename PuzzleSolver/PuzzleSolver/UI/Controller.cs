@@ -29,8 +29,13 @@ namespace PuzzleSolver.UI
 		// ・ソルバ（計算）
 		// でそれぞれ1つずつのスレッドを立ち上げる。
 		// ソルバのViewPuzzleの中身をビューで表示する。
-		public void Syakunetsukun(Puzzle initialPuzzle)
+		//
+		//返り値：True：正常終了
+		public bool Syakunetsukun(Puzzle initialPuzzle)
 		{
+			//ソルバーを初期化（ログを消すなど）
+			solve = new Solver();
+
 			//ソルバのスレッドを立ち上げる
 			Task.Run(() => solve.Solve(initialPuzzle));
 			//solve.Solve(initialPuzzle);
@@ -39,7 +44,7 @@ namespace PuzzleSolver.UI
 			ValueTuple<DX.KeyState, DX.Result> prev_key;
 			ValueTuple<DX.KeyState, DX.Result> key;
 			int strongDrawPieceId = -1; //強調表示するピースの番号
-			int cursor = 0;			//カーソル
+			int cursor = 0;         //カーソル
 
 			key = DX.GetHitKeyStateAll();
 			while (DX.ScreenFlip() == 0 && DX.ProcessMessage() == 0 && DX.ClearDrawScreen() == 0)
@@ -48,8 +53,8 @@ namespace PuzzleSolver.UI
 				key = DX.GetHitKeyStateAll();
 
 				//キー操作
-				if (key.Item1[DX.KeyInput.Escape])
-					return;
+				if (!prev_key.Item1[DX.KeyInput.Escape] && key.Item1[DX.KeyInput.Escape])
+					return true;
 
 				if (!prev_key.Item1[DX.KeyInput.NumPadEnter] && key.Item1[DX.KeyInput.NumPadEnter])
 				{
@@ -70,47 +75,16 @@ namespace PuzzleSolver.UI
 
 				view.UpdateDrawInfo();
 
-				//QRコードが送信された場合（形状情報…readして再起動. 配置情報…渡されたピースを特定し、位置を合わせ、位置確定フラグを立てる）
-				if (Network.ProconPuzzleService.IsQrCodeReceived)
-				{
-					Procon2017MCTProtocol.QRCodeData QrCode = Network.ProconPuzzleService.QrCode;
-
-					solve.Cancel();
-					if (!QrCode.IsHint)
-					{
-						Read read = new Read();
-						initialPuzzle = read.ReadFromQRCode(QrCode);
-					}
-					else
-					{
-						List<Poly> polys = new List<Poly>();
-						for (int i = 0; i < QrCode.Polygons.Count; i++)
-						{
-							polys.Add(Poly.ParsePolyFromQRCode(QrCode.Polygons[i], true));
-						}
-						for (int i = 0; i < polys.Count; i++)
-						{
-							Tuple<int, int, int, bool> hint = DetectPiece(initialPuzzle, polys[i]);
-							if (hint == null) { continue; }
-							SetDetectPiece(polys[i], initialPuzzle.pieces[hint.Item1], hint.Item2, hint.Item3, hint.Item4);
-						}
-					}
-					System.Threading.Thread.Sleep(100);
-					Task.Run(() => solve.Solve(initialPuzzle));
-					cursor = 0;
-				}
-
 				//ViewPuzzles.Count == 0だったら表示に移らない
 				if (solve.ViewPuzzles.Count == 0) { continue; }
 
 				//表示したいパズルを渡す
-				Puzzle ViewPuzzle = solve.ViewPuzzles[cursor];
+				Puzzle ViewPuzzle = solve.ViewPuzzles[cursor].Clone();
 				if (Network.ProconPuzzleService.IsPolygonReceived)
 				{
 					//支援システムから、Webカメラに写った多角形を読み取る。もし読み取れて、かつ、該当する多角形が存在すればViewクラスで表示。
 					Poly recivedPiece = Poly.ParsePolyFromQRCode(Network.ProconPuzzleService.Polygon, true, -1);
 					int id = CalcPieceId(ViewPuzzle, recivedPiece);
-					//DX.WriteLineDx("recived!");
 					if (id != -1) { strongDrawPieceId = id; }
 				}
 
@@ -123,6 +97,7 @@ namespace PuzzleSolver.UI
 					view.DrawPieceStrong(ViewPuzzle, strongDrawPieceId, false);
 				}
 			}
+			return false;
 		}
 
 		//配置情報の多角形poly, 形状情報initialPuzzleが与えられるので、何番のピースが与えられたかを特定せよ。
