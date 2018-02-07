@@ -70,7 +70,7 @@ namespace PuzzleSolver
 #endif
 			}
 
-			string directoryName = GetReadDirectoryName(@"C:\Users\hashimotolab\Documents\GitHub\procon2017-solver\PuzzleSolver\PuzzleSolver\readDirectoryName.txt");
+			string directoryName = GetReadDirectoryName(Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), @"readDirectoryName.txt"));
 			List<Puzzle> initialPuzzles = SetInitialPuzzles(directoryName);
 
 			foreach (Puzzle initialPuzzle in initialPuzzles)
